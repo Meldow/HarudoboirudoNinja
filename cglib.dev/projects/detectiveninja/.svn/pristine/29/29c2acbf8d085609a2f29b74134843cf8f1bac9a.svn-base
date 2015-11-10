@@ -1,0 +1,47 @@
+#ifndef ITEM_MAP_LOADER_H
+#define ITEM_MAP_LOADER_H
+
+#include "cg/cg.h"
+#include <windows.h>
+#include <stdio.h>
+#include <gl\gl.h>
+#include <gl\glu.h>
+#include "MainApp.h"
+#include "Ninja.h"
+#include "Enemy.h"
+#include "BoxRed.h"
+#include "BoxBlue.h"
+#include "BoxGreen.h"
+#include "BoxPink.h"
+
+#pragma comment(lib, "opengl32.lib")					// Link OpenGL32.lib
+#pragma comment(lib, "glu32.lib")						// Link Glu32.lib
+
+#define		MAP_SIZE	  1024							// Size Of Our .RAW Height Map
+#define		STEP_SIZE	  50							// Width And Height Of Each Quad - quanto menor este valor, melhor, aumenta peso exponencial
+#define		HEIGHT_RATIO  1.0f							// Ratio That The Y Is Scaled According To The X And Z
+
+namespace proj {
+
+	class ItemMapLoader : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener
+	{
+	private:
+		
+		BYTE g_ItemMap[MAP_SIZE*MAP_SIZE];						// Holds The Item Map Data
+		
+	public:
+		ItemMapLoader (std::string id);
+		~ItemMapLoader();
+		
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+		void LoadRawFile(LPSTR strName, int nSize, BYTE *g_ItemMap);
+		int Height(BYTE *g_ItemMap, int X, int Y);
+		void setItems(BYTE *g_ItemMap);
+	};
+}
+
+#endif

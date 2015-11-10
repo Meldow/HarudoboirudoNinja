@@ -1,0 +1,90 @@
+#include "ObjectSexyMagazine.h"
+
+namespace proj {
+
+	ObjectSexyMagazine::ObjectSexyMagazine(std::string id, cg::Vector3d position) : WorldObject(id, position) {}
+	ObjectSexyMagazine::~ObjectSexyMagazine() {}
+
+	void ObjectSexyMagazine::init() {
+		_caught = _dropped = _spotted = false;
+		registerToCollisionManager();
+		dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"))->registerObject(dynamic_cast<Debug*>(this));
+	}
+	
+	void ObjectSexyMagazine::update(unsigned long elapsed_millis) {
+
+		bool hadBeenCaught = _caught;
+		if (_isColliding && !_caught) {
+			_caught = true;
+			_position.set(0.0f, 0.0f, 0.0f);
+		}
+		if (_caught && !hadBeenCaught) {
+			LevelManager* lvlManager = dynamic_cast<LevelManager*>(cg::Registry::instance()->get("LevelManager"));
+			lvlManager->onClueGet();
+		}
+	}
+
+	void ObjectSexyMagazine::draw() {
+
+		if (!_caught) {
+
+			if (isDebug()) {
+
+				float* color = getBoundingSphere(0)->getColor();
+				glPushMatrix();
+
+					glDisable(GL_LIGHTING);
+
+					glColor3f(color[0], color[1], color[2]);
+					glTranslatef(getBoundingSphere(0)->getPosition()[0], getBoundingSphere(0)->getPosition()[1], getBoundingSphere(0)->getPosition()[2]);
+					glutWireSphere(getBoundingSphere(0)->getRadius(), 20, 20);
+
+					glEnable(GL_LIGHTING);
+
+				glPopMatrix();
+			}
+
+			TextureManager* textureManager = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+			GLuint sexyMagazineCover = textureManager->get("tex_icha_icha_tactics_cover")->getTextureDL();
+			GLuint sexyMagazineSpine = textureManager->get("tex_icha_icha_tactics_spine")->getTextureDL();
+			GLuint sexyMagazine = textureManager->get("tex_icha_icha_tactics")->getTextureDL();
+
+			glPushMatrix();
+				
+				glEnable(GL_TEXTURE_2D);
+				glTranslatef(_position[0], _position[1], _position[2] + SEXY_MAGAZINE_HEIGHT / 2);
+				glRotatef(30.0f, 0.0f, 0.0f, 1.0f);
+				glScalef(SEXY_MAGAZINE_WIDTH, SEXY_MAGAZINE_LENGTH, SEXY_MAGAZINE_HEIGHT);
+				unitCube(sexyMagazine, sexyMagazine, sexyMagazineCover, sexyMagazine, sexyMagazineSpine, sexyMagazine);
+				glDisable(GL_TEXTURE_2D);
+
+			glPopMatrix();
+		}
+	}
+
+	void ObjectSexyMagazine::registerToCollisionManager() {
+
+		createBoundingSpheres();
+
+		CollisionManager *collisionManager = (CollisionManager*)cg::Registry::instance()->get("CollisionManager");
+		collisionManager->registerSexyMagazine(dynamic_cast<Collidable*>(cg::Registry::instance()->get(getId())));
+	}
+
+	void ObjectSexyMagazine::createBoundingSpheres() {
+
+		double radius = SEXY_MAGAZINE_LENGTH / 2;
+		cg::Vector3d position(_position[0], _position[1], _position[2] + SEXY_MAGAZINE_HEIGHT / 2);
+
+		BoundingSphere *b = new BoundingSphere(radius, position);
+		addBoundingSphere(b);
+	}
+
+	void ObjectSexyMagazine::updateBoundingSpheres() {}
+
+	cg::Vector3d ObjectSexyMagazine::getPosition() {
+		return _position;
+	}
+
+	cg::Vector3d ObjectSexyMagazine::getFront() { return cg::Vector3d(1,0,0); }
+	void ObjectSexyMagazine::setHeight(int height) {}
+}

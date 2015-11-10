@@ -1,0 +1,50 @@
+#ifndef ENEMY_H
+#define ENEMY_H
+
+#include <string>
+#include "cg/cg.h"
+#include "WorldObject.h"
+#include "Physics.h"
+#include "CollisionManager.h"
+#include "TextureManager.h"
+
+namespace proj {
+
+	class Enemy : public WorldObject
+	{
+	private:
+		Physics _physics;
+
+		bool _isRunning;
+		bool _jumpKeyReleased;
+
+		float _headWidth, _headLength, _headHeight;
+		float _bodyWidth, _bodyLength, _bodyHeight;
+		float _armWidth, _armLength, _armHeight;
+		float _legWidth, _legLength, _legHeight;
+
+		float _bodyAngle, _armAngle[2], _legAngle[2];
+		cg::Vector3f _armRotationVector[2], _legRotationVector[2];
+		bool _legDirection[2];	// true if moving forward; false if moving backwards
+
+		void updateAngles();
+
+	protected:
+		void registerToCollisionManager();
+		void createBoundingSpheres();
+		void updateBoundingSpheres();
+
+	public:
+		Enemy(std::string id, cg::Vector3d position);
+		~Enemy();
+
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+
+		cg::Vector3d getPosition();
+		void setHeight(int height);
+	};
+}
+
+#endif

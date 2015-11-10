@@ -1,0 +1,24 @@
+#ifndef MAIN_WORLD_H
+#define MAIN_WORLD_H
+
+#include <string>
+#include "cg/cg.h"
+
+namespace proj {
+
+	class MainWorld : public cg::Entity,
+		public cg::IDrawListener
+	{
+	private:
+		unsigned int _winWidth, _winHeight, _border;
+
+	public:
+		MainWorld(const std::string& id);
+		~MainWorld();
+		
+		void init();
+		void draw();
+	};
+}
+
+#endif

@@ -1,0 +1,28 @@
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
+
+#include "cg/cg.h"
+#include "ImageLoaderHeightMap.h"
+#include "Debug.h"
+#include "Scene.h"
+#include "Camera.h"
+#include "FreeCamera.h"
+#include "CollisionManager.h"
+#include "Collidable.h"
+
+namespace proj {
+
+	class Controller : public cg::Entity,
+		public cg::IKeyboardEventListener
+	{
+	public:
+		Controller();
+		~Controller();
+		void init();
+        void onKeyPressed(unsigned char key);
+        void onKeyReleased(unsigned char key);
+        void onSpecialKeyReleased(int key);
+	};
+}
+
+#endif

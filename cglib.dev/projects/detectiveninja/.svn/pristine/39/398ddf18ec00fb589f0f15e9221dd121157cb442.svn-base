@@ -1,0 +1,25 @@
+#ifndef SKYBOX_H
+#define SKYBOX_H
+
+#include "cg/cg.h"
+#include "TextureManager.h"
+
+namespace proj {
+
+	class Skybox : public cg::Entity,
+		public cg::IDrawListener
+	{
+	private:
+		float _x, _y, _z;
+		float _width, _height, _length;
+
+	public:
+		Skybox();
+		~Skybox();
+
+		void init();
+		void draw();
+	};
+}
+
+#endif

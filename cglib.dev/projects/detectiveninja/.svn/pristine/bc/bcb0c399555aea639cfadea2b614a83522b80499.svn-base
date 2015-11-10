@@ -1,0 +1,68 @@
+#include "MenuManager.h"
+
+namespace proj {
+
+	MenuManager::MenuManager() : Entity("MenuManager") {
+		_menus = new std::list<Menu*>();
+	}
+	MenuManager::~MenuManager() {}
+	
+	void MenuManager::init() {
+		Menu* main = new MainMenu();
+		add(main);
+		add(new LevelSelectMenu());
+		add(new InGameMenu());
+
+		_currentMenu = main;
+		activateCurrentMenu();
+	}
+
+	void MenuManager::add(Menu* m) {
+		_menus->push_back(m);
+		cg::Registry::instance()->add(m);
+		cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+		view->linkEntityAtEnd(m->getTitle());
+	}
+
+	void MenuManager::clear() {
+		_menus->clear();
+	}
+
+	
+	Menu* MenuManager::get(std::string name) {
+		Menu* menu = NULL;
+		std::list<Menu*>::iterator it;
+
+		for(it = _menus->begin(); it != _menus->end(); it++) {
+			if(!(*it)->getTitle().compare(name))
+				menu = *it;
+		}
+		return menu;
+	}
+
+	Menu* MenuManager::getCurrentMenu() {
+		return _currentMenu;
+	}
+
+	void MenuManager::goToMenu(Menu* m) {
+		deactivateCurrentMenu();
+		_currentMenu = m;
+		activateCurrentMenu();
+	}
+	void MenuManager::goToMenuByName(std::string menuName) {
+		goToMenu(get(menuName));
+	}
+
+	void MenuManager::activateCurrentMenu() {
+		_currentMenu->activate();
+	}
+	void MenuManager::deactivateCurrentMenu() {
+		_currentMenu->deactivate();
+	}
+
+	void MenuManager::onKeyReleased(unsigned char key) {
+		_currentMenu->onKeyReleased(key);
+	}
+
+
+}

@@ -1,0 +1,22 @@
+#include "Collidable.h"
+
+namespace proj {
+
+	Collidable::Collidable() {
+		_isColliding = false;
+		_boundingSpheres = new std::vector<BoundingSphere*>();
+	}
+	Collidable::~Collidable() {}
+
+	void Collidable::addBoundingSphere(BoundingSphere* boundingSphere) {
+		_boundingSpheres->push_back(boundingSphere);
+	}
+
+	bool Collidable::isColliding() {
+		return _isColliding;
+	}
+
+	void Collidable::isColliding(bool isColliding) {
+		_isColliding = isColliding;
+	}
+}

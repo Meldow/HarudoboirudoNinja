@@ -1,0 +1,37 @@
+#ifndef COLLIDABLE_H
+#define COLLIDABLE_H
+
+#include "cg/cg.h"
+#include "BoundingSphere.h"
+
+namespace proj {
+
+	class Collidable 
+	{
+	private:
+		// A collidable object can have more than one bounding sphere.
+		std::vector<BoundingSphere*>* _boundingSpheres;
+		bool _isColliding;
+
+	protected:
+		virtual void createBoundingSpheres() = 0;
+		virtual void updateBoundingSpheres() = 0;
+
+		void addBoundingSphere(BoundingSphere* boundingSphere);
+
+	public:
+		Collidable();
+		~Collidable();
+
+		bool isColliding();
+		void isColliding(bool isColliding);
+
+		BoundingSphere* getBoundingSphere(int index);
+		std::vector<BoundingSphere*>* getBoundingSpheres();
+
+		virtual cg::Vector3d getPosition() = 0;
+		virtual void setHeight(int height) = 0;
+	};
+}
+
+#endif

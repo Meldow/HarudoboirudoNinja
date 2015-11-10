@@ -1,0 +1,17 @@
+#ifndef DEBUG_H
+#define DEBUG_H
+
+#include "cg/cg.h"
+
+namespace proj {
+
+	class Debug : 
+		public cg::IKeyboardEventListener
+	{
+	public:
+		virtual void enableDebug();
+		virtual void disableDebug();
+	};
+}
+
+#endif

@@ -1,0 +1,52 @@
+#include "MaterialManager.h"
+
+namespace proj {
+
+	MaterialManager::MaterialManager() : Entity("MaterialManager") {}
+	MaterialManager::~MaterialManager() {}
+	
+	void MaterialManager::init() {
+		_materials = new std::list<Material*>();
+		
+		//adding Obsidian material
+		Material* obsidian = new Material();
+		obsidian->setName("obsidian");
+		obsidian->setMatAmbient(0.05375f, 0.05f, 0.06625f, 1.0f);
+		obsidian->setMatDiffuse(0.18275f, 0.17f, 0.22525f, 1.0f);
+		obsidian->setMatSpecular(0.332741f, 0.328634f, 0.346435f, 1.0f);
+		obsidian->setMatShininess(38.4f);
+		add(obsidian);
+		
+		//adding Emerald material
+		Material* emerald = new Material();
+		emerald->setName("emerald");
+		emerald->setMatAmbient(0.0215f,  0.1745f,   0.0215f,  1.0f);
+		emerald->setMatDiffuse( 0.07568f, 0.61424f,  0.07568f, 1.0f);
+		emerald->setMatSpecular( 0.633f,   0.727811f, 0.633f,   1.0f);
+		emerald->setMatShininess(76.8f);
+		add(emerald);
+	}
+
+	void MaterialManager::add(Material* m) {
+		m->makeMaterial();
+		_materials->push_back(m);
+	}
+
+	void MaterialManager::clear() {
+		_materials->clear();
+	}
+
+	Material* MaterialManager::get(std::string name) {
+		Material* material = NULL;
+		
+		std::list<Material*>::iterator it;
+
+		for(it = _materials->begin(); it != _materials->end(); it++) {
+			if(!(*it)->getName().compare(name))
+				material = *it;
+		}
+		
+		return material;
+	}
+
+}

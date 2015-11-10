@@ -1,0 +1,32 @@
+#ifndef DEBUG_MANAGER_H
+#define DEBUG_MANAGER_H
+
+#include <math.h>
+#include "cg/cg.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class DebugManager : public cg::Entity
+	{
+	private:
+		bool _active;
+		std::list<Debug*>* _debugLights;
+		std::list<Debug*>* _debugObjects;
+		void switchDebugListON(std::list<Debug*>* dlist);
+		void switchDebugListOFF(std::list<Debug*>* dlist);
+	public:
+		DebugManager();
+		~DebugManager();
+
+		void init();
+		void onDebugOn();
+		void onDebugOff();
+		void registerLight(Debug* dlight);
+		void registerObject(Debug* dobj);
+
+		bool isDebug();
+	};
+}
+
+#endif

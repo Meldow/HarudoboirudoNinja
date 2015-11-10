@@ -1,0 +1,24 @@
+#ifndef MAIN_TERRAIN_H
+#define MAIN_TERRAIN_H
+
+#include <string>
+#include "cg/cg.h"
+
+namespace proj {
+
+	class MainTerrain : public cg::Entity,
+		public cg::IDrawListener
+	{
+	private:
+		float _terrainWidth, _terrainLength, _terrainHeight;
+
+	public:
+		MainTerrain(const std::string& id);
+		~MainTerrain();
+		
+		void init();
+		void draw();
+	};
+}
+
+#endif

@@ -1,0 +1,42 @@
+#ifndef MENU_H
+#define MENU_H
+
+#include <vector>
+#include <string>
+#include <sstream>
+#include <ctype.h>
+#include "cg/cg.h"
+#include "Command.h"
+
+namespace proj {
+
+    class Menu : public cg::Entity, 
+		public cg::IDrawListener,
+		public cg::IReshapeEventListener,
+		public cg::IKeyboardEventListener
+		//public cg::IMouseEventListener,
+		//public cg::IUpdateListener
+	{
+    protected:
+		std::vector<Command*>* _commands;
+		std::string _title;
+		unsigned int _winHeight;
+		unsigned int _winWidth;
+		unsigned int _selectedCommand;
+		bool _active;
+    public:
+        Menu(const std::string id);
+        ~Menu();
+        virtual void init();
+        void drawOverlay();
+        void onReshape(int width, int height);
+		//void update(unsigned long elapsed_millis);
+		void onKeyReleased(unsigned char key);
+		void addCommand(Command* command);
+		void activate();
+		void deactivate();
+		std::string getTitle();
+	};
+}
+
+#endif

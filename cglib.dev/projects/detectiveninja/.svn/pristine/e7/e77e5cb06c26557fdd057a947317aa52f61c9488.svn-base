@@ -1,0 +1,67 @@
+#include "PositionalLight.h"
+
+namespace proj {
+
+	PositionalLight::PositionalLight(std::string id, GLenum lightConstant, float position[], float direction[]) : Light(id) {
+		_lightConstant = lightConstant;
+		_position = cg::Vector3f(position[0], position[1], position[2]);
+		//printf("IN light init: %f %f %f\n", _position[0], _position[1], _position[2]);
+		makeLight(position, direction);
+	}
+
+	PositionalLight::~PositionalLight() {}
+
+	void PositionalLight::init() {
+
+		GLfloat ambient[] =	{ 0.1f, 0.1f, 0.1f, 1.0f };
+		GLfloat diffuse[] =	{ 0.9f, 0.9f, 0.9f, 1.0f };
+		GLfloat specular[] = { 0.9f, 0.9f, 0.9f, 1.0f };
+
+		glLightfv(_lightConstant, GL_AMBIENT, ambient);
+		glLightfv(_lightConstant, GL_DIFFUSE, diffuse);
+		glLightfv(_lightConstant, GL_SPECULAR, specular);
+		glLightf(_lightConstant, GL_SPOT_CUTOFF, 90.0f);
+
+		glEnable(_lightConstant);
+		_lightOn = true;
+
+		switch(_lightConstant) {
+			case GL_LIGHT1:
+				_controlLightKey = '1';
+				break;
+			case GL_LIGHT2:
+				_controlLightKey = '2';
+				break;
+			case GL_LIGHT3:
+				_controlLightKey = '3';
+				break;
+			case GL_LIGHT4:
+				_controlLightKey = '4';
+				break;
+			case GL_LIGHT5:
+				_controlLightKey = '5';
+				break;
+			case GL_LIGHT6:
+				_controlLightKey = '6';
+				break;
+			case GL_LIGHT7:
+				_controlLightKey = '7';
+				break;
+		}
+
+		dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"))->registerLight(dynamic_cast<Debug*>(this));
+	}
+
+	inline
+	void PositionalLight::makeLight(float position[], float direction[]) {
+
+		_lightDL = glGenLists(1);
+		assert(_lightDL != 0);
+
+		glNewList(_lightDL,GL_COMPILE);
+			//printf("IN light makeLight: %f %f %f\n", position[0], position[1], position[2]);
+			glLightfv(_lightConstant, GL_POSITION, position);
+			glLightfv(_lightConstant, GL_SPOT_DIRECTION, direction);
+		glEndList();
+	}
+}

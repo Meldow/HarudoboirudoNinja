@@ -1,0 +1,48 @@
+#include "Grid.h"
+
+//TODO alterar para 3D
+namespace proj {
+
+	Grid::Grid(std::string id) : cg::Entity(id) {
+	}
+	Grid::~Grid() {
+	}
+	void Grid::init() {
+		cg::tWindowInfo win = cg::Manager::instance()->getApp()->getWindowInfo();
+		//_position.set(win.width/2.0f, win.height/2.0f);
+		
+	}
+
+	void Grid::update(unsigned long elapsed_millis) {
+	}
+
+	void Grid::draw() {
+		
+		if(!isDebug()) {
+			return;
+		}
+
+		glPushMatrix();
+
+			glColor3f(1.0f,1.0f,1.0f);
+			
+			for(x = 0; x<= 1024;) {
+				glBegin(GL_LINES);
+					glVertex3f(x,1024,0);
+					glVertex3f(x,0,0);
+				glEnd();
+				x += 10;
+			}
+
+			for(y = 0; y<= 1024;) {
+				glBegin(GL_LINES);
+					glVertex3f(1024,y,0);
+					glVertex3f(0,y,0);
+				glEnd();
+				x += 10;
+			
+				y += 10;
+			}
+		glPopMatrix();
+	}
+}

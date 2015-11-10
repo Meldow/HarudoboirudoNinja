@@ -1,0 +1,75 @@
+#include "Controller.h"
+
+namespace proj {
+
+	Controller::Controller() : cg::Entity("Controller") {}
+	Controller::~Controller() {}
+	void Controller::init() {}
+
+	void Controller::onKeyPressed(unsigned char key) {
+		if (key == 27) { 
+			static_cast<MenuManager*>(cg::Registry::instance()->get("MenuManager"))->ingameMenu();
+        }
+	}
+
+	void Controller::onKeyReleased(unsigned char key) {
+		
+		if (key == '1') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				Camera* cam = dynamic_cast<Camera*>(cg::Registry::instance()->get("Camera"));
+				
+				if(!cam->getType().compare("FreeCamera")) {
+					cam->mainCamera();
+					return;
+				}
+				if(!cam->getType().compare("MainCamera")) {
+					cam->freeCamera();
+					return;
+				}
+			}
+		}
+		if (key == '2') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->toggleMapDebugMode();
+			}
+		}
+		if (key == '3') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->togglePlayerDebugMode();
+			}
+		}
+		if (key == '4') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->toggleEnemyDebugMode();
+			}
+		}
+		if (key == '5') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->toggleStaticObjectDebugMode();
+			}
+		}
+	}
+
+	void Controller::onSpecialKeyReleased(int key) {
+
+        if (key == GLUT_KEY_F1) {
+			cg::Manager::instance()->getApp()->dump();
+        }
+		if(key == GLUT_KEY_F2) { 
+			DebugManager* dm = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			Camera* camera = dynamic_cast<Camera*>( cg::Registry::instance()->get("Camera"));
+			if(dm->isDebugModeActive())
+				camera->mainCamera();
+			else
+				camera->freeCamera();
+			dm->toggleDebugMode();
+			static_cast<Scene*>(cg::Registry::instance()->get("Scene"))->switchDebug();
+		}
+	
+	}
+}

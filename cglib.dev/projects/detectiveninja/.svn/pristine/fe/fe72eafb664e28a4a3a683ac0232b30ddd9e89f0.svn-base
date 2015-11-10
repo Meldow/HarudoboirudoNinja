@@ -1,0 +1,21 @@
+#include "Debug.h"
+
+namespace proj {
+
+	Debug::Debug() {
+		_debugMode = false;
+	}
+	
+	void Debug::enableDebug() {
+		_debugMode = true;
+	}
+		
+	void Debug::disableDebug() {
+		_debugMode = false;
+	}
+
+	bool Debug::isDebug() {
+		return _debugMode;
+	}
+
+}

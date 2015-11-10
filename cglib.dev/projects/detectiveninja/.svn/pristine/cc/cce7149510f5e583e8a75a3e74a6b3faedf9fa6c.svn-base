@@ -1,0 +1,59 @@
+#ifndef IMAGE_LOADER_HEIGHT_MAP
+#define IMAGE_LOADER_HEIGHT_MAP
+#define _CRT_SECURE_NO_DEPRECATE	
+
+#include "cg/cg.h"
+#include <math.h>
+#include "MaterialManager.h"
+#include <windows.h>									// Header File For Windows
+#include <stdio.h>										// Header file for standard input output (IE, "FILE")
+#include <gl\gl.h>										// Header File For The OpenGL32 Library
+#include <gl\glu.h>										// Header File For The GLu32 Library
+//#include <gl\glaux.h>									// Header File For The Glaux Library
+#include "Debug.h"
+
+
+#pragma comment(lib, "opengl32.lib")					// Link OpenGL32.lib
+#pragma comment(lib, "glu32.lib")						// Link Glu32.lib
+
+#define		MAP_SIZE	  1024							// Size Of Our .RAW Height Map
+#define		STEP_SIZE	  8							// Width And Height Of Each Quad - quanto menor este valor, melhor, aumenta peso exponencial
+#define		HEIGHT_RATIO  1.0f							// Ratio That The Y Is Scaled According To The X And Z
+
+namespace proj {
+
+	class ImageLoaderHeightMap : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener,
+		public Debug
+	{
+	private:
+		
+		BYTE g_HeightMap[MAP_SIZE*MAP_SIZE];					// Holds The Height Map Data
+		float scaleValue;										// Scale Value For The Terrain
+		cg::Vector3d _position;
+		std::string _mapFile;
+		float _rotate;
+
+	public:
+		ImageLoaderHeightMap(std::string id);
+		ImageLoaderHeightMap(std::string id, cg::Vector3d position);
+		~ImageLoaderHeightMap();
+		
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+		void LoadRawFile(LPSTR strName, int nSize, BYTE *pHeightMap);
+		int Height(BYTE *pHeightMap, int X, int Y);
+		int Height(int X, int Y);
+		void SetVertexColor(BYTE *pHeightMap, int x, int y);
+		void RenderHeightMap(BYTE pHeightMap[]);
+		void drawAxes();
+		void drawNormalVertex(int x, int z, cg::Vector3d _up);
+		cg::Vector3d crossProduct(cg::Vector3d v1, cg::Vector3d v2);
+		cg::Vector3d makeVec(double x1, double y1, double z1, double x2, double y2, double z2);
+		
+	};
+}
+
+#endif

@@ -1,0 +1,62 @@
+#include "DebugManager.h"
+
+namespace proj {
+
+	DebugManager::DebugManager() : Entity("DebugManager") {
+		_active = false;
+		_debugLights = new std::list<Debug*>();
+		_debugObjects = new std::list<Debug*>();
+
+	}
+	DebugManager::~DebugManager() {
+	}
+
+	void DebugManager::init() {
+	}
+
+	bool DebugManager::isDebug() {
+		return _active;
+	}
+
+	void DebugManager::onDebugOn() {
+		_active = true;
+		switchDebugListON(_debugLights);
+		switchDebugListON(_debugLights);
+	}
+
+	void DebugManager::onDebugOff() {
+		_active = false;
+		switchDebugListOFF(_debugLights);
+		switchDebugListOFF(_debugObjects);
+	}
+
+	void DebugManager::switchDebugListON(std::list<Debug*>* dlist) {
+		std::list<Debug*>::iterator it;
+		for(it = dlist->begin(); it != dlist->end(); it++) {
+			(*it)->enableDebug();
+		}
+	}
+
+	void DebugManager::switchDebugListOFF(std::list<Debug*>* dlist) {
+		std::list<Debug*>::iterator it;
+		for(it = dlist->begin(); it != dlist->end(); it++) {
+			(*it)->disableDebug();
+		}
+	}
+
+	void DebugManager::registerLight(Debug* dlight) {
+		_debugLights->push_back(dlight);
+	}
+
+	void DebugManager::registerObject(Debug* dobj) {
+		_debugLights->push_back(dobj);
+	}
+
+	void DebugManager::clearDebugLights() {
+		_debugLights->clear();
+	}
+
+	void DebugManager::clearDebugObjects() {
+		_debugObjects->clear();
+	}
+}

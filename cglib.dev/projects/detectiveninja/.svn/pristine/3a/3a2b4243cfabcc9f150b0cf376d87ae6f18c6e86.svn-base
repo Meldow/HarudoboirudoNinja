@@ -1,0 +1,262 @@
+#include "CollisionManager.h"
+
+namespace proj {
+
+	CollisionManager::CollisionManager() : cg::Entity("CollisionManager") {}
+	CollisionManager::~CollisionManager() {}
+
+	void CollisionManager::init() {
+		_ninjas = new std::vector<Collidable*>();
+		_enemies = new std::vector<Collidable*>();
+		_clues = new std::vector<Collidable*>();
+		_sexyMagazines = new std::vector<Collidable*>();
+		_staticObjects = new std::vector<Collidable*>();
+
+		_map = (ImageLoaderHeightMap*)cg::Registry::instance()->get("mappedterrain");
+	}
+
+	void CollisionManager::update(unsigned long elapsed_millis) {
+		int _auxid;
+
+		for (int ninjaIdx = 0; ninjaIdx < _ninjas->size(); ninjaIdx++) {
+			
+			Collidable* ninja = _ninjas->at(ninjaIdx);
+
+			/* Ninja vs. Height Map */
+
+			bool isColliding = heightMapHorizontalCollision(ninja);
+			heightMapVerticalCollision(ninja);
+
+			ninja->getBoundingSphere(0)->isColliding(isColliding);	// DEBUG
+			if (isColliding) {
+				ninja->isColliding();
+			}
+
+			/* Ninja vs. Clue */
+			for (int clueIdx = 0; clueIdx < _clues->size(); clueIdx++) {
+
+				isColliding = dynamicVsStaticObjectCollisionDetection(ninja, _clues->at(clueIdx));
+				_clues->at(clueIdx)->getBoundingSphere(0)->isColliding(isColliding);	// DEBUG
+
+				if (isColliding) {
+					_clues->at(clueIdx)->isColliding();
+				}
+			}
+
+			/* Ninja vs. Sexy Magazines */
+			for (int sexyMagIdx = 0; sexyMagIdx < _sexyMagazines->size(); sexyMagIdx++) {
+
+				isColliding = dynamicVsStaticObjectCollisionDetection(ninja, _sexyMagazines->at(sexyMagIdx));
+				_sexyMagazines->at(sexyMagIdx)->getBoundingSphere(0)->isColliding(isColliding);		// DEBUG
+
+				if (isColliding) {
+					_sexyMagazines->at(sexyMagIdx)->isColliding();
+				}
+			}
+		
+			/* Ninja vs. Static Object */
+			for (int staticObjIdx = 0; staticObjIdx < _staticObjects->size(); staticObjIdx++) {
+
+				int isColliding = dynamicVsStaticObjectCollisionDetection(ninja, _staticObjects->at(staticObjIdx));
+				if (isColliding > -1) {
+					ninja->isColliding();
+					_staticObjects->at(staticObjIdx)->getBoundingSphere(0)->isColliding(true);	// DEBUG
+				}
+				else {
+					_staticObjects->at(staticObjIdx)->getBoundingSphere(0)->isColliding(false);	// DEBUG
+				}
+			}
+
+			for (int enemyIdx = 0; enemyIdx < _enemies->size(); enemyIdx++) {
+
+				Collidable* enemy = _enemies->at(enemyIdx);
+
+				//heightMapCollisionDetection(enemy);
+
+				/* Enemy vs Sexy Magazines */
+
+				for (int sexyMagIdx = 0; sexyMagIdx < _sexyMagazines->size(); sexyMagIdx++) {
+
+					int isColliding = dynamicVsStaticObjectCollisionDetection(enemy, _sexyMagazines->at(sexyMagIdx));
+					if (isColliding > -1) {
+						((Enemy*) enemy)->spottedSexyMagazine();
+						return;
+					}
+				}
+
+				/* Enemy vs. Static Boxes */
+
+				int staticCollisionBSIdx = -1;
+				for (int staticObjIdx = 0; staticObjIdx < _staticObjects->size(); staticObjIdx++) {
+
+					int enemyBSIdx = dynamicVsStaticObjectCollisionDetection(enemy, _staticObjects->at(staticObjIdx));
+					if (enemyBSIdx > -1) {
+						staticCollisionBSIdx = enemyBSIdx;
+						break;
+					}
+				}
+
+				/* Ninja vs. Enemy */
+
+				int ninjaCollisionBSIdx = ninjaVsEnemyCollisionDetection(ninja, enemy);
+				if (ninjaCollisionBSIdx > -1) {	// Ninja lost !
+
+					if ((staticCollisionBSIdx > -1) && (staticCollisionBSIdx < ninjaCollisionBSIdx)) {
+						return;
+					}
+
+					((Enemy*) enemy)->spottedNinja();
+
+					Scene *scene = (Scene*)cg::Registry::instance()->get("Scene");
+					scene->onLose();
+				}
+			}
+		}
+	}
+
+	bool CollisionManager::heightMapHorizontalCollision(Collidable* dynamicObject) {
+
+		bool isColliding = false;
+
+		cg::Vector3d objPosition = dynamicObject->getPosition();
+		cg::Vector3d objDirection = dynamicObject->getFront();
+
+		//if my height and my forward OR back height is bigger then 10 units, i cannot move forward!
+		if ( (_map->Height(	objPosition[0] + objDirection[0]*dynamicObject->getBoundingSphere(0)->getRadius()*2, objPosition[1] + objDirection[1]*dynamicObject->getBoundingSphere(0)->getRadius()*2) 
+			 > objPosition[2] + objDirection[2]*dynamicObject->getBoundingSphere(0)->getRadius()*2+10) 
+			 ||
+			 _map->Height(	objPosition[0] - objDirection[0]*dynamicObject->getBoundingSphere(0)->getRadius()*2, objPosition[1] - objDirection[1]*dynamicObject->getBoundingSphere(0)->getRadius()*2) 
+			 > objPosition[2] + objDirection[2]*dynamicObject->getBoundingSphere(0)->getRadius()*2+10) {
+
+			isColliding = true;
+		}
+
+		else {
+			
+			isColliding = false;
+		}
+
+		return isColliding;
+	}
+
+	void CollisionManager::heightMapVerticalCollision(Collidable* dynamicObject) {
+		cg::Vector3d objPosition = dynamicObject->getPosition();
+
+		int roundPosX = (int) objPosition[0];
+		int roundPosY = (int) objPosition[1];
+
+		float fracPosX = objPosition[0] - roundPosX;
+		float fracPosY = objPosition[1] - roundPosY;
+
+		float avgHeight = _map->Height(roundPosX, roundPosY) * (1.0f - fracPosX) * (1.0f - fracPosY)
+							+ _map->Height(roundPosX + 1, roundPosY) * fracPosX * (1.0f - fracPosY)
+							+ _map->Height(roundPosX, roundPosY + 1) * (1.0f - fracPosX) * fracPosY
+							+ _map->Height(roundPosX + 1, roundPosY + 1) * fracPosX * fracPosY;
+
+		dynamicObject->setHeight(avgHeight);
+	}
+
+
+	int CollisionManager::ninjaVsEnemyCollisionDetection(Collidable* ninja, Collidable* enemy) {
+
+		int sphereIdx = -1;
+
+		for (int ninjaBSIdx = 0; ninjaBSIdx < ninja->getBoundingSpheres()->size(); ninjaBSIdx++) {
+
+			for (int enemyBSIdx = 0; enemyBSIdx < enemy->getBoundingSpheres()->size(); enemyBSIdx++) {
+
+				if ((enemyBSIdx > 3) && (sphereIdx > -1)) {	// A body collision occured, update vision bounding spheres
+					enemy->getBoundingSphere(enemyBSIdx)->isColliding(false);
+				}
+				else {
+
+					bool isColliding = boundingSphereCollisionDetection(ninja->getBoundingSphere(ninjaBSIdx), enemy->getBoundingSphere(enemyBSIdx));
+				
+					// DEBUG
+					ninja->getBoundingSphere(ninjaBSIdx)->isColliding(isColliding);
+					enemy->getBoundingSphere(enemyBSIdx)->isColliding(isColliding);
+
+					if ((enemyBSIdx == 0) && !isColliding) {	// A body collision will not occur Ignore remaining body bounding spheres
+						enemyBSIdx = 3;
+					}
+					else if (isColliding) {	// Body collision
+						sphereIdx = enemyBSIdx;
+								
+						if ((ninjaBSIdx >= 1) && (ninjaBSIdx <= 3) && (enemyBSIdx >= 1) && (enemyBSIdx <= 3)) {
+							ninja->isColliding();
+							enemyBSIdx = 3;		// A body collision occured, ignore remaining body bounding spheres
+						}
+					}
+				}
+			}
+
+			if ((ninjaBSIdx == 0) && (sphereIdx == -1)) {	// It won't collide
+				return -1;
+			}
+			else if ((ninjaBSIdx > 0) && (sphereIdx > -1)) {
+				return sphereIdx;
+			}
+		}
+
+		return -1;
+	}
+
+	int CollisionManager::dynamicVsStaticObjectCollisionDetection(Collidable* dynamicObject, Collidable* staticObject) {
+
+		int sphereIdx = -1;
+
+		BoundingSphere* staticObjectBS = staticObject->getBoundingSphere(0);	// Static objects only have one bounding sphere
+
+		for (int dynamicObjectBSIdx = 0; dynamicObjectBSIdx < dynamicObject->getBoundingSpheres()->size(); dynamicObjectBSIdx++) {
+
+			bool isColliding = boundingSphereCollisionDetection(dynamicObject->getBoundingSphere(dynamicObjectBSIdx), staticObjectBS); 
+
+			if (isColliding) {
+				sphereIdx = dynamicObjectBSIdx;
+			}
+
+			// DEBUG
+			dynamicObject->getBoundingSphere(dynamicObjectBSIdx)->isColliding(isColliding);
+			staticObjectBS->isColliding(isColliding);
+
+			//if ((dynamicObjectBSIdx == 0) && !isColliding) {
+			//	return false;
+			//} else
+			if ((dynamicObjectBSIdx > 0) && isColliding) {
+				return sphereIdx;
+			}
+		}
+
+		return -1;
+	}
+
+	bool CollisionManager::boundingSphereCollisionDetection(BoundingSphere* boundingSphere1, BoundingSphere* boundingSphere2) {
+		
+		cg::Vector3d v = boundingSphere1->getPosition() - boundingSphere2->getPosition();
+		double minDistance = boundingSphere1->getRadius() + boundingSphere2->getRadius();
+		double d = v[0] * v[0] + v[1] * v[1] + v[2] * v[2] - minDistance * minDistance;
+
+		if (d < 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	void CollisionManager::registerNinja(Collidable* ninja) {
+		_ninjas->push_back(ninja);
+	}
+	void CollisionManager::registerEnemy(Collidable* enemy) {
+		_enemies->push_back(enemy);
+	}
+	void CollisionManager::registerClue(Collidable* clue) {
+		_clues->push_back(clue);
+	}
+	void CollisionManager::registerSexyMagazine(Collidable* sexyMagazine) {
+		_sexyMagazines->push_back(sexyMagazine);
+	}
+	void CollisionManager::registerStaticObject(Collidable* staticObject) {
+		_staticObjects->push_back(staticObject);
+	}
+}

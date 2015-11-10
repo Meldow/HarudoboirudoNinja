@@ -1,0 +1,35 @@
+#ifndef COMMAND_H
+#define COMMAND_H
+
+#include "cg/cg.h"
+
+namespace proj {
+
+    class Command :  
+		public cg::IReshapeEventListener,
+		public cg::IMouseEventListener
+	{
+	protected:
+		std::string _title;
+		GLfloat _Xsize;
+		GLfloat _Ysize;
+    public:
+        Command(const std::string id);
+        ~Command();
+        void drawOverlay();
+        
+		void onReshape(int width, int height);
+        /*
+		void onMouse(int button, int state, int x, int y);
+        void onMouseMotion(int x, int y);
+        void onMousePassiveMotion(int x, int y);
+		*/
+		virtual void execute();
+
+		std::string getTitle();
+		GLfloat getXsize();
+		GLfloat getYsize();
+	};
+}
+
+#endif

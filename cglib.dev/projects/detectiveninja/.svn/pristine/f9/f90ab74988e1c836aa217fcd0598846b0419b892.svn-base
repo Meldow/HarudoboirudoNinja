@@ -1,0 +1,94 @@
+#include "ObjectClue.h"
+
+namespace proj {
+
+	ObjectClue::ObjectClue(std::string id, cg::Vector3d position) : WorldObject(id, position) {
+	}
+	ObjectClue::~ObjectClue() {}
+
+	void ObjectClue::init() {
+		_caught = false;
+		dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"))->registerStaticObject(dynamic_cast<Debug*>(this));
+		registerToCollisionManager();
+	}
+
+	void ObjectClue::setup() {
+		
+		
+	}
+	
+	void ObjectClue::update(unsigned long elapsed_millis) {
+
+		bool hadBeenCaught = _caught;
+		if (_isColliding && !_caught) {
+			_caught = true;
+			_position.set(0.0f, 0.0f, 0.0f);
+		}
+		if (_caught && !hadBeenCaught) {
+			LevelManager* lvlManager = dynamic_cast<LevelManager*>(cg::Registry::instance()->get("LevelManager"));
+			lvlManager->onClueGet();
+		}
+	}
+
+	void ObjectClue::draw() {
+
+		if (!_caught) {
+
+			if (isDebug()) {
+
+				float* color = getBoundingSphere(0)->getColor();
+				glPushMatrix();
+
+					glDisable(GL_LIGHTING);
+
+					glColor3f(color[0], color[1], color[2]);
+					glTranslated(getBoundingSphere(0)->getPosition()[0], getBoundingSphere(0)->getPosition()[1], getBoundingSphere(0)->getPosition()[2]);
+					glutWireSphere(getBoundingSphere(0)->getRadius(), 20, 20);
+
+					glEnable(GL_LIGHTING);
+
+				glPopMatrix();
+			}
+
+			TextureManager* tm = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+			MaterialManager* mm = dynamic_cast<MaterialManager*>( cg::Registry::instance()->get("MaterialManager"));
+			GLuint txClue = tm->get("clue")->getTextureDL();
+			
+			glPushMatrix();
+				
+				glEnable(GL_TEXTURE_2D);
+				//mm->get("emerald")->apply();
+				glTranslated(_position[0], _position[1], _position[2] + CLUE_SIZE / 2);
+				glScalef(CLUE_SIZE, CLUE_SIZE, CLUE_SIZE);
+				unitCube(txClue);
+				glDisable(GL_TEXTURE_2D);
+			glPopMatrix();
+		}
+	}
+
+	void ObjectClue::registerToCollisionManager() {
+
+		createBoundingSpheres();
+
+		CollisionManager *collisionManager = (CollisionManager*)cg::Registry::instance()->get("CollisionManager");
+		collisionManager->registerClue(dynamic_cast<Collidable*>(cg::Registry::instance()->get(getId())));
+	}
+
+	void ObjectClue::createBoundingSpheres() {
+
+		float radius = sqrt(CLUE_SIZE * CLUE_SIZE / 2);
+		cg::Vector3d position(_position[0], _position[1], _position[2] + CLUE_SIZE / 2);
+
+		BoundingSphere *b = new BoundingSphere(radius, position);
+		addBoundingSphere(b);
+	}
+
+	void ObjectClue::updateBoundingSpheres() {}
+
+	cg::Vector3d ObjectClue::getPosition() {
+		return _position;
+	}
+
+	cg::Vector3d ObjectClue::getFront() { return cg::Vector3d(1,0,0); }
+	void ObjectClue::setHeight(int height) {}
+}

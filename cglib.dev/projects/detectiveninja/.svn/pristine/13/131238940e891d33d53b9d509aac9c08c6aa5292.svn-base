@@ -1,0 +1,8 @@
+1 < Range < 254
+
+50	Player
+75	Enemy
+100	BoxRed
+125	BoxPink
+150	BoxBlue
+175	BoxGreen

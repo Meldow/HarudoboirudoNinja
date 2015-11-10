@@ -1,0 +1,25 @@
+#ifndef BOUNDING_SPHERE_H
+#define BOUNDING_SPHERE_H
+
+#include "cg/cg.h"
+
+namespace proj {
+
+	class BoundingSphere 
+	{
+	private:
+		float _radius;
+		cg::Vector3d _position;
+
+	public:
+		BoundingSphere(float radius, cg::Vector3d position);
+		~BoundingSphere();
+
+		void updatePosition(cg::Vector3d newPosition);
+
+		float getRadius();
+		cg::Vector3d getPosition();
+	};
+}
+
+#endif

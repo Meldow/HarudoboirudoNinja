@@ -1,0 +1,21 @@
+#ifndef LEVEL_SELECT_MENU_H
+#define LEVEL_SELECT_MENU_H
+
+#include "Menu.h"
+#include "MainMenuCommand.h"
+#include "ExitToDesktopCommand.h"
+
+namespace proj {
+
+    class LevelSelectMenu :
+		public Menu
+	{	
+    public:
+        LevelSelectMenu();
+        ~LevelSelectMenu();
+        void init();
+  		
+	};
+}
+
+#endif

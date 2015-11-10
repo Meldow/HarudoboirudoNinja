@@ -1,0 +1,45 @@
+#include "MainApp.h"
+
+namespace proj {
+
+	MainApp::MainApp() {
+		_windowInfo.caption = "Hardboiled Ninja";
+		_windowInfo.width = 1024;
+		_windowInfo.height = 768;
+		_windowInfo.x = 0;
+		_windowInfo.y = 0;
+	}
+	MainApp::~MainApp() {
+	}
+	
+	void MainApp::createEntities() {
+		
+		//maincamera needs a reference for randomcube, therefore, randomcube (player) must be init created first
+		addEntity(new Player("ninja"));
+		addEntity(new MainCamera("maincamera"));
+
+		addEntity(new Controller("controller"));
+		addEntity(new MainTerrain("terrain"));
+		
+		addEntity(new HeightMapLoader("mappedterrain"));
+		
+		
+		
+		
+	}
+
+	void MainApp::createViews() {	//cria vista, e.g. minimapa
+		
+		cg::View* v0 = createView("view1");
+		v0->setViewport(0.0f,0.0f,1.0f,1.0f);
+		
+		v0->linkEntityAtEnd("maincamera");	//objectos necessarios para view1
+		v0->linkEntityAtEnd("mappedterrain");
+		v0->linkEntityAtEnd("terrain");	//objectos necessarios para view1
+		v0->linkEntityAtEnd("ninja");	//objectos necessarios para view1
+		
+
+		
+
+	}
+}

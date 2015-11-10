@@ -1,0 +1,27 @@
+#ifndef Grid_H
+#define Grid_H
+
+#include "cg/cg.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class Grid : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener,
+		public Debug
+	{
+	private:
+		float x, y, z;
+
+	public:
+		Grid(std::string id);
+		~Grid();
+		
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+	};
+}
+
+#endif

@@ -1,0 +1,21 @@
+#ifndef TOGGLE_DEBUG_COMMAND_H
+#define TOGGLE_DEBUG_COMMAND_H
+
+#include "Command.h"
+#include "DebugManager.h"
+#include "MainApp.h"
+#include "cg/cg.h"
+
+namespace proj {
+
+    class ToggleDebugCommand :  
+		public Command
+	{
+    public:
+        ToggleDebugCommand();
+        ~ToggleDebugCommand();
+		void execute();
+	};
+}
+
+#endif

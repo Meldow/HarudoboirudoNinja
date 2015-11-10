@@ -1,0 +1,30 @@
+#ifndef MY_LIGHT_H
+#define MY_LIGHT_H
+
+#include <string>
+#include "cg/cg.h"
+#include "Light.h"
+#include "DebugManager.h"
+
+namespace proj {
+
+	class PositionalLight : public Light
+	{
+	private:
+		void makeLight(float position[], float direction[]);
+
+	public:
+		PositionalLight(std::string id, GLenum lightConstant, float position[], float direction[]);
+		~PositionalLight();
+
+		void init();
+
+		void setLightSourcePosition(double x, double y, double z);
+		void setAmbientLight(float params[]);
+		void setDiffuseLight(float params[]);
+		void setSpecularLight(float params[]);
+		void setAngle(float angle);
+	};
+}
+
+#endif

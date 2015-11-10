@@ -1,0 +1,32 @@
+#ifndef MAIN_APP_H
+#define MAIN_APP_H
+
+#include "cg/cg.h"
+#include "MainCamera.h"
+#include "Camera.h"
+#include "FreeCamera.h"
+#include "Controller.h"
+#include "Ninja.h"
+#include "Enemy.h"
+#include "MainTerrain.h"
+#include "HeightMapLoader.h"
+#include "Grid.h"
+#include "Scene.h"
+#include "DirectionalLight.h"
+#include "PositionalLight.h"
+#include "ItemMapLoader.h"
+#include "MaterialManager.h"
+#include "TextureManager.h"
+
+namespace proj {
+
+	class MainApp : public cg::Application {
+	public:
+		MainApp();
+		~MainApp();
+		void createEntities();
+		void createViews();
+	};
+}
+
+#endif

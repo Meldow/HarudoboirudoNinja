@@ -1,0 +1,71 @@
+#include "StaticBox.h"
+
+namespace proj {
+
+	StaticBox::StaticBox(std::string id, cg::Vector3d position, double size) : WorldObject(id, position) {
+		_boxSize = size;
+	}
+	StaticBox::~StaticBox() {}
+
+	void StaticBox::init() {
+		registerToCollisionManager();
+		dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"))->registerObject(dynamic_cast<Debug*>(this));
+	}
+	
+	void StaticBox::update(unsigned long elapsed_millis) {}
+
+	void StaticBox::draw() {
+
+		if (isDebug()) {
+
+			float* color = getBoundingSphere(0)->getColor();
+			glPushMatrix();
+
+				glDisable(GL_LIGHTING);
+
+				glColor3f(color[0], color[1], color[2]);
+				glTranslatef(getBoundingSphere(0)->getPosition()[0], getBoundingSphere(0)->getPosition()[1], getBoundingSphere(0)->getPosition()[2]);
+				glutWireSphere(getBoundingSphere(0)->getRadius(), 20, 20);
+
+				glEnable(GL_LIGHTING);
+
+			glPopMatrix();
+		}
+
+		TextureManager* tm = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+		GLuint txCrate = tm->get("crate")->getTextureDL();
+
+		glPushMatrix();
+			glEnable(GL_TEXTURE_2D);
+			glTranslatef(_position[0], _position[1], _position[2] + _boxSize / 2);
+			glScalef(_boxSize, _boxSize, _boxSize);
+			unitCube(txCrate);
+			glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
+	}
+
+	void StaticBox::registerToCollisionManager() {
+
+		createBoundingSpheres();
+
+		CollisionManager *collisionManager = (CollisionManager*)cg::Registry::instance()->get("CollisionManager");
+		collisionManager->registerStaticObject(dynamic_cast<Collidable*>(cg::Registry::instance()->get(getId())));
+	}
+
+	void StaticBox::createBoundingSpheres() {
+
+		double radius = sqrt(_boxSize * _boxSize / 2);
+		cg::Vector3d position(_position[0], _position[1], _position[2] + _boxSize / 2);
+
+		BoundingSphere *b = new BoundingSphere(radius, position);
+		addBoundingSphere(b);
+	}
+
+	void StaticBox::updateBoundingSpheres() {}
+
+	cg::Vector3d StaticBox::getPosition() {
+		return _position;
+	}
+
+	void StaticBox::setHeight(int height) {}
+}

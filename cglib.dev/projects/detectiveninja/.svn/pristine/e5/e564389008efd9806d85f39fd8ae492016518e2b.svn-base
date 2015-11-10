@@ -1,0 +1,29 @@
+#ifndef BOX_RED_H
+#define BOX_RED_H
+
+#include <string>
+#include "cg/cg.h"
+
+namespace proj {
+
+	class BoxRed : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener
+	{
+	private:
+		cg::Vector3d _position;
+
+	public:
+		BoxRed(std::string id, cg::Vector3d position);
+		~BoxRed();
+		
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+		
+		cg::Vector3d getPosition();
+	};
+}
+
+
+#endif

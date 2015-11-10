@@ -1,0 +1,29 @@
+#ifndef LEVEL_MANAGER_H
+#define LEVEL_MANAGER_H
+
+#include "cg/cg.h"
+#include "MaterialManager.h"
+#include "TextureManager.h"
+#include "Level.h"
+
+namespace proj {
+
+	class LevelManager : public cg::Entity
+	{
+	private:
+		Level* _currentLevel;
+		MaterialManager* _materialManager;
+		TextureManager* _textureManager;
+		int _currentClues;
+		//TODO list of clues
+	public:
+		LevelManager();
+		~LevelManager();
+		void init();
+		void addClue();
+		void loadLevel(Level* lvl);
+		void restartLevel();
+	};
+}
+
+#endif

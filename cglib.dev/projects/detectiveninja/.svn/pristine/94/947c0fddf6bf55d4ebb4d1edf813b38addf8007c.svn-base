@@ -1,0 +1,14 @@
+#include "LevelSelectMenu.h"
+
+namespace proj {
+	LevelSelectMenu::LevelSelectMenu() : Menu("LevelSelectMenu"){
+		_commands->push_back(new MainMenuCommand());
+		_commands->push_back(new ExitToDesktopCommand());
+	}
+	LevelSelectMenu::~LevelSelectMenu() {
+	}
+
+	void LevelSelectMenu::init() {
+		//Menu::init();
+	}
+}

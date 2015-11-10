@@ -1,0 +1,77 @@
+#include "LevelManager.h"
+
+namespace proj {
+
+	LevelManager::LevelManager() : Entity("LevelManager") {
+		_currentClues = 0;
+		printf("LEVEL MANAGER INIT\n");
+	}
+	LevelManager::~LevelManager() {}
+	
+	void LevelManager::init() {
+		
+		
+	}
+
+	void LevelManager::onClueGet() {
+		_currentClues++;
+		
+		//checks if level is over
+		if(_currentClues == _currentLevel->getTotalClues()) {
+			Scene* scene = dynamic_cast<Scene*>( cg::Registry::instance()->get("Scene"));
+			scene->onWin();
+		}
+	}
+	
+	void LevelManager::loadLevel(Level* lvl) {
+		printf("STARTING TO LOADL LEVEL \n" );
+		
+		_currentLevel = lvl;
+		_currentClues = 0;
+		MaterialManager* materialManager = dynamic_cast<MaterialManager*>(cg::Registry::instance()->get("MaterialManager"));
+		TextureManager* textureManager = dynamic_cast<TextureManager*>(cg::Registry::instance()->get("TextureManager"));
+		
+		
+		materialManager->clear();
+		
+		std::list<Material*>::iterator matit;
+		for(matit = lvl->getMaterials()->begin(); matit != lvl->getMaterials()->end(); matit++) {
+			materialManager->add(*matit);
+		}
+
+		textureManager->clear();
+		std::list<Texture*>::iterator texit;
+		for(texit = lvl->getTextures()->begin(); texit != lvl->getTextures()->end(); texit++) {
+			textureManager->add(*texit);
+		}
+
+		
+		cg::Registry::instance()->add(new ImageLoaderHeightMap("mappedterrain", LEVEL_PATH + _currentLevel->getHeightMap()));
+		cg::Registry::instance()->add(new ImageLoaderItemMap("mappeditems", LEVEL_PATH + _currentLevel->getHeightMap(), LEVEL_PATH + _currentLevel->getItemMap()));
+		
+		//dynamic_cast<cg::View*>(cg::Registry::instance()->get("view1"))->linkEntityAtEnd("mappedterrain");
+		
+		printf("LEVEL LOADED\n");
+	
+	}
+
+	void LevelManager::restartLevel() {
+		_currentClues = 0;
+
+		//reactivate all clues
+	}
+
+	int LevelManager::getTotalClues() {
+		return _currentLevel->getTotalClues();
+	}
+
+	int LevelManager::getCurrentClues() {
+		return _currentClues;
+	}
+
+	void LevelManager::addClue() {
+		_currentLevel->addClue();
+		printf("ADDING CLUE\n");
+	}
+
+}

@@ -1,0 +1,56 @@
+#ifndef DEBUG_MANAGER_H
+#define DEBUG_MANAGER_H
+
+#include <math.h>
+#include "cg/cg.h"
+#include "Debug.h"
+#include "Camera.h"
+
+namespace proj {
+
+	class DebugManager : public cg::Entity
+	{
+	private:
+		bool _debugModeActive;
+		bool _mapDebugModeActive, _playerDebugModeActive, _enemyDebugModeActive, _staticObjectDebugModeActive;
+
+		std::list<Debug*>* _debugMaps;
+		std::list<Debug*>* _debugPlayers;
+		std::list<Debug*>* _debugEnemies;
+		std::list<Debug*>* _debugStaticObjects;
+
+		void switchDebugListOn(std::list<Debug*>* dlist);
+		void switchDebugListOff(std::list<Debug*>* dlist);
+
+	public:
+		DebugManager();
+		~DebugManager();
+
+		void init();
+
+		bool isDebugModeActive();
+		void toggleDebugMode();
+		void enableDebug();
+		void disableDebug();
+
+		void registerMap(Debug* map);
+		void registerPlayer(Debug* player);
+		void registerEnemy(Debug* enemy);
+		void registerStaticObject(Debug* staticObject);
+	
+		void clearDebugMaps();
+		void clearDebugPlayers();
+		void clearDebugEnemies();
+		void clearDebugStaticObjects();
+
+		void toggleMapDebugMode();
+		void togglePlayerDebugMode();
+		void toggleEnemyDebugMode();
+		void toggleStaticObjectDebugMode();
+
+		void dispose();
+		int getListsSize();
+	};
+}
+
+#endif

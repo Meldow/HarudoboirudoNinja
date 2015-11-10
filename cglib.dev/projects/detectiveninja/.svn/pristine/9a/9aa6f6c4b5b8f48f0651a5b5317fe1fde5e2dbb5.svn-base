@@ -1,0 +1,49 @@
+#ifndef MAIN_CAMERA_H
+#define MAIN_CAMERA_H
+
+#include <string>
+#include "cg/cg.h"
+#include "ITargetable.h"
+
+namespace proj {
+
+    class MainCamera : public cg::Entity, 
+		public cg::IDrawListener,			//event needed for draw when needed
+		public cg::IReshapeEventListener,	//event needed for reshape
+		public cg::IMouseEventListener
+	{
+    private:
+		double _winWidth, _winHeight;
+		
+		
+		int _camHeight;
+
+		double CAM_MOVE;
+		double _x, _y, _z;
+		
+		ITargetable* _target;
+		cg::Vector2d _winSize;
+		cg::Vector3d _position;
+		cg::Vector3d _up,_front,_right;
+		cg::Quaterniond _orientation, _q;
+		cg::Vector2d _lastMousePosition;
+		float _scale;
+		bool _isRoll;
+
+
+
+    public:
+		MainCamera();
+        virtual ~MainCamera();
+        void init();							//init values of the camera
+        void draw();							//draw the camera
+        void onReshape(int width, int height);	//reshapes if needed
+		void onMouse(int button, int state, int x, int y);
+        void onMouseMotion(int x, int y);
+        void onMousePassiveMotion(int x, int y);
+		
+
+	};
+}
+
+#endif

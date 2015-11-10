@@ -1,0 +1,43 @@
+#ifndef SCENE_H
+#define SCENE_H
+
+#include <string>
+#include "cg/cg.h"
+#include "Debug.h"
+#include "LevelManager.h"
+
+namespace proj {
+
+	class Scene : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IReshapeEventListener
+	{
+	private:
+		//LevelManager* _lvlm;
+		int _winHeight;
+		int _winWidth;
+		bool _won;
+		bool _lost;
+		bool _notEnoughMags;
+
+		void initLighting();
+		void initFog();
+
+	public:
+		Scene();
+		~Scene();
+		void init();
+		void draw();
+		void drawOverlay();
+		bool getWon();
+		bool getLost();
+		
+		void onReshape(int width, int height);
+		void onLose();
+		void onWin();
+		void reset();
+		void setNotEnoughMags(bool value);
+	};
+}
+
+#endif

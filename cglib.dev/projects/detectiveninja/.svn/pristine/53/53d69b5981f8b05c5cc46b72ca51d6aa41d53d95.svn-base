@@ -1,0 +1,21 @@
+#ifndef INGAME_MENU_H
+#define INGAME_MENU_H
+
+#include "Menu.h"
+#include "MainMenuCommand.h"
+#include "ExitToDesktopCommand.h"
+
+namespace proj {
+
+    class InGameMenu :
+		public Menu
+	{	
+    public:
+        InGameMenu();
+        ~InGameMenu();
+        void init();
+  		
+	};
+}
+
+#endif

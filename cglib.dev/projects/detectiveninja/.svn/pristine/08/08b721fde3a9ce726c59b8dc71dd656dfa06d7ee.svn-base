@@ -1,0 +1,37 @@
+#ifndef MENU_MANAGER_H
+#define MENU_MANAGER_H
+
+
+#include <string.h>
+#include <list>
+#include "cg/cg.h"
+#include "Menu.h"
+#include "MainMenu.h"
+#include "LevelSelectMenu.h"
+#include "InGameMenu.h"
+
+namespace proj {
+
+	class MenuManager : public cg::Entity,
+		public cg::IKeyboardEventListener
+	{
+	private:
+		std::list<Menu*>* _menus;
+		Menu* _currentMenu;
+	public:
+		MenuManager();
+		~MenuManager();
+		void init();
+		void add(Menu* m);
+		void clear();
+		Menu* get(std::string name);
+		Menu* getCurrentMenu();
+		void goToMenu(Menu* m);
+		void goToMenuByName(std::string menuName);
+		void deactivateCurrentMenu();
+		void activateCurrentMenu();
+		void onKeyReleased(unsigned char key);
+	};
+}
+
+#endif

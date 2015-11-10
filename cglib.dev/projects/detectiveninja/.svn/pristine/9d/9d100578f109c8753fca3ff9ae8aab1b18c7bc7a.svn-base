@@ -1,0 +1,75 @@
+#include "CollisionManager.h"
+
+namespace proj {
+
+	CollisionManager::CollisionManager() : cg::Entity("CollisionManager") {}
+	CollisionManager::~CollisionManager() {}
+
+	void CollisionManager::init() {
+		_enemies = new std::vector<Collidable*>();
+		_staticObjects = new std::vector<Collidable*>();
+	}
+
+	void CollisionManager::update(unsigned long elapsed_millis) {
+
+		for (int i = 0; i < _enemies->size(); i++) {
+			(_enemies->at(i))->isColliding(boundingSphereCollisionTest(_ninja, _enemies->at(i)));
+		}
+
+		for (int j = 0; j < _staticObjects->size(); j++) {
+			_ninja->isColliding(boundingSphereCollisionTest(_ninja, _staticObjects->at(j)));
+		}
+	}
+
+	void CollisionManager::registerNinja(Collidable* ninja) {
+		_ninja = ninja;
+	}
+	void CollisionManager::registerEnemy(Collidable* enemy) {
+		_enemies->push_back(enemy);
+	}
+	void CollisionManager::registerStaticObject(Collidable* staticObject) {
+		_staticObjects->push_back(staticObject);
+	}
+
+	bool CollisionManager::boundingSphereCollisionTest(Collidable* collidableObj1, Collidable* collidableObj2) {
+
+		//// Relative velocity
+		//cg::Vector3d dv = collidableObj2->getVelocity() - collidableObj1->getVelocity();
+
+		//// Relative position
+		//cg::Vector3d dp = collidableObj2->getPosition() - collidableObj1->getPosition();
+
+		//// Minimal distance squared
+		//double r = collidableObj1->getBoundingSphereRadius() + collidableObj2->getBoundingSphereRadius();
+  //
+		//// dp^2 - r^2
+		//double pp = dp[0] * dp[0] + dp[1] * dp[1] + dp[2] * dp[2] - r * r;
+
+		//// (1) Check if the spheres are already intersecting
+		//if (pp < 0) {
+		//	return true;
+		//}
+
+		////dp * dv
+		//double pv = dp[0] * dv[0] + dp[1] * dv[1] + dp[2] * dv[2];
+	
+		//// (2) Check if the spheres are moving away from each other
+		//if (pv >= 0) {
+		//	return false;
+		//}
+  //
+		//// dV^2
+		//double vv = dv[0] * dv[0] + dv[1] * dv[1] + dv[2] * dv[2];
+
+		//// (3) Check if the spheres can intersect within 1 frame
+		//if ((pv + vv) <= 0 && (vv + 2 * pv + pp) >= 0) {
+		//	return false;
+		//}
+
+		//// discriminant / 4
+		//double d = pv * pv - pp * vv; 
+		//return (d > 0);
+
+		return false;
+	}
+}

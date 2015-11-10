@@ -1,0 +1,26 @@
+#include "Level.h"
+
+namespace proj {
+
+	Level::Level(int nr, std::string name) : Entity(name) {
+		_levelNumber = nr;
+	}
+	Level::~Level() {}
+
+	void Level::init() {
+	}
+
+	std::list<Material*>* Level::getMaterials() {
+		std::list<Material*>* matlist = &_levelMats;
+		return matlist;
+	}
+
+	std::list<Texture*>* Level::getTextures() {
+		std::list<Texture*>* matlist = &_levelTexs;
+		return matlist;
+	}
+
+	int Level::getTotalClues() {
+		return _totalClues;
+	}
+}

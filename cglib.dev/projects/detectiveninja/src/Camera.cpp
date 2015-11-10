@@ -1,0 +1,51 @@
+#include "Camera.h"
+
+namespace proj {
+	Camera::Camera() : Entity("Camera") {
+	}
+    Camera::~Camera() {
+	}
+    void Camera::init() {
+		_mode = dynamic_cast<CameraMode*>( cg::Registry::instance()->get("MainCamera") );
+	}
+    void Camera::draw() {
+		_mode->draw();
+    }
+
+	void Camera::onReshape(int width, int height) {
+		_mode->onReshape(width, height);
+	}
+
+	void Camera::onMouse(int button, int state, int x, int y) {
+		_mode->onMouse(button, state, x, y);
+	}
+	void Camera::onMouseMotion(int x, int y) {
+		_mode->onMouseMotion(x,y);
+	}
+	void Camera::onMousePassiveMotion(int x, int y) {
+		_mode->onMousePassiveMotion(x,y);
+	}
+
+	void Camera::update(unsigned long elapsed_millis) {
+		_mode->update(elapsed_millis);
+	}
+
+	void Camera::firstPersonCamera() {
+		//TODO implement firs-person camera (flashlight)
+		//_mode = dynamic_cast<CameraMode*>( cg::Registry::instance()->get("FirstPersonCamera") );
+	}
+
+	void Camera::freeCamera() {
+		_mode = dynamic_cast<CameraMode*>(cg::Registry::instance()->get("FreeCamera"));
+		_mode->reset();
+	}
+
+	void Camera::mainCamera() {
+		_mode = dynamic_cast<CameraMode*>( cg::Registry::instance()->get("MainCamera") );	
+	}
+
+	std::string Camera::getType() {
+		return _mode->getType();
+	}
+
+}

@@ -1,0 +1,148 @@
+//white is the top, black is the bottom
+
+//Red: X
+//Green: Y
+//Blue: Z
+
+//verificacao height
+//if(vPos.y < Height(g_ItemMap, (int)vPos.x, (int)vPos.z ) + 10)
+/*
+setpos
+glRotatef(180.0,1.0,0.0,0.0); //rotate to correct position, method yas Y has Height
+		glTranslatef(-MAP_SIZE/2,-MAP_SIZE/2,0.0);
+*/
+#include "ItemMapLoader.h"
+
+namespace proj {
+	
+	ItemMapLoader::ItemMapLoader(std::string id) : cg::Entity(id) {}
+	ItemMapLoader::~ItemMapLoader() {}
+
+	void ItemMapLoader::init() {
+		printf("-------- Item Map --------\n");
+		printf("LOADING ITEMMAP...\n");
+		LoadRawFile("../../data/ItemTest2.raw", MAP_SIZE * MAP_SIZE, g_ItemMap); 
+		setItems(g_ItemMap);
+		printf("ITEMMAP LOADED.\n");
+	}
+
+	void ItemMapLoader::draw(){}
+	void ItemMapLoader::update(unsigned long elapsed_millis) {}
+
+	void ItemMapLoader::LoadRawFile(LPSTR strName, int nSize, BYTE *pItemMap)
+	{
+		FILE *pFile = NULL;
+
+		// Open The File In Read / Binary Mode.
+		pFile = fopen( strName, "rb" );
+
+		// Check To See If We Found The File And Could Open It
+		if ( pFile == NULL )	
+		{
+			// Display Error Message And Stop The Function
+			//printf(NULL, "Can't Find The Height Map!", "Error", MB_OK);
+			printf("ItemMapLoader: Can't Find The Height Map!\n");
+			return;
+		}
+
+		fread( pItemMap, 1, nSize, pFile );
+
+		// After We Read The Data, It's A Good Idea To Check If Everything Read Fine
+		int result = ferror( pFile );
+
+		// Check If We Received An Error
+		if (result)
+		{
+			//printf(NULL, "Failed To Get Data!", "Error", MB_OK);
+			printf("ItemMapLoader: Failed To Get Data!\n");
+		}
+
+		// Close The File.
+		fclose(pFile);
+		printf("ItemMapLoader: Item data collected sucessfully.\n");
+	}
+
+	int ItemMapLoader::Height(BYTE *pItemMap, int X, int Y)				// This Returns The Height From A Height Map Index
+	{
+		int x = X % MAP_SIZE;								// Error Check Our x Value
+		int y = Y % MAP_SIZE;								// Error Check Our y Value
+
+		if(!pItemMap) return 0;							// Make Sure Our Data Is Valid
+		
+		return pItemMap[x + (y * MAP_SIZE)];				// Index Into Our Height Array And Return The Height	
+	}
+
+	void ItemMapLoader::setItems(BYTE *pItemMap) {
+		int X = 0, Y = 0;
+		
+		int _50count = 0, _75count = 0, _100count = 0;
+		int _125count = 0, _150count = 0, _175count = 0;
+		int _200count = 0;
+
+		for ( X = 0; X < MAP_SIZE; X += STEP_SIZE )
+		{
+			for ( Y = 0; Y < MAP_SIZE; Y += STEP_SIZE )
+			{
+
+				if (Height(pItemMap, X, Y ) == 50) {
+					_50count++;
+		
+					//printf("ITEMMAPLOADER::setItem:50 at %d %d\n",X, Y);
+					//cg::Registry::instance()->add(new RedBox("redbox", cg::Vector3d(X, Y, 0)));
+					//cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					//view->linkEntityAtEnd("redbox");
+				}
+				if (Height(pItemMap, X, Y ) == 75) {
+					_75count++;
+		
+					//printf("ITEMMAPLOADER::setItem:50 at %d %d\n",X, Y);
+					//cg::Registry::instance()->add(new ("redbox", cg::Vector3d(X, Y, 0)));
+					//cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					//view->linkEntityAtEnd("redbox");
+				}
+				if (Height(pItemMap, X, Y ) == 100) {
+					_100count++;
+		
+					printf("ITEMMAPLOADER::setItem:100 at %d %d\n",X, Y);
+					cg::Registry::instance()->add(new BoxRed("boxred"+_100count, cg::Vector3d(X, Y, 0)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd("boxred"+_100count);
+				}
+				if (Height(pItemMap, X, Y ) == 125) {
+					_125count++;
+		
+					printf("ITEMMAPLOADER::setItem:125 at %d %d\n",X, Y);
+					cg::Registry::instance()->add(new BoxPink("boxpink"+_125count, cg::Vector3d(X, Y, 0)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd("boxpink"+_125count);
+				}
+				if (Height(pItemMap, X, Y ) == 150) {
+					_150count++;
+		
+					printf("ITEMMAPLOADER::setItem:150 at %d %d\n",X, Y);
+					cg::Registry::instance()->add(new BoxBlue("boxblue"+_150count, cg::Vector3d(X, Y, 0)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd("boxblue"+_150count);
+				}
+				if (Height(pItemMap, X, Y ) == 175) {
+					_175count++;
+		
+					printf("ITEMMAPLOADER::setItem:175 at %d %d\n",X, Y);
+					cg::Registry::instance()->add(new BoxGreen("boxgreen"+_175count, cg::Vector3d(X, Y, 0)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd("boxgreen"+_175count);
+				}
+			}
+		}
+		
+		printf("ITEMMAPLOADER::Drawing %d\t items with 50 strength\n", _50count);
+		printf("ITEMMAPLOADER::Drawing %d\t items with 75 strength\n", _75count);
+		printf("ITEMMAPLOADER::Drawing %d\t items with 100 strength\n", _100count);
+		printf("ITEMMAPLOADER::Drawing %d\t items with 125 strength\n", _125count);
+		printf("ITEMMAPLOADER::Drawing %d\t items with 150 strength\n", _150count);
+		printf("ITEMMAPLOADER::Drawing %d\t items with 175 strength\n", _175count);
+		
+	}
+}
+
+

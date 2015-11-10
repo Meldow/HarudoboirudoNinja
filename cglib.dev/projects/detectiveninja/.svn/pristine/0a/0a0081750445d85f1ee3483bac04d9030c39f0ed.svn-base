@@ -1,0 +1,45 @@
+#include "MainApp.h"
+
+namespace proj {
+
+	MainApp::MainApp() {
+
+		_windowInfo.caption = "Hardboiled Ninja";
+		_windowInfo.width = 1024;
+		_windowInfo.height = 768;
+		_windowInfo.x = 0;
+		_windowInfo.y = 0;
+	}
+
+	MainApp::~MainApp() {}
+	
+	void MainApp::createEntities() {
+		
+		addEntity(new Scene());
+		addEntity(new Camera());
+		addEntity(new MainCamera());
+		addEntity(new FreeCamera());
+		addEntity(new DirectionalLight("DirectionalLight"));
+		addEntity(new PositionalLight("PositionalLight0"));
+		addEntity(new Player("Ninja"));
+		addEntity(new Controller("controller"));
+		addEntity(new MainTerrain("terrain"));	//used for test purpose, useless on real game
+		addEntity(new HeightMapLoader("mappedterrain"));
+		addEntity(new Grid("grid1"));
+	}
+
+	void MainApp::createViews() {
+		
+		cg::View* v = createView("view1");
+		v->setViewport(0.0f,0.0f,1.0f,1.0f);
+		v->linkEntityAtEnd("Scene");
+		v->linkEntityAtEnd("Camera");
+		v->linkEntityAtEnd("DirectionalLight");
+		v->linkEntityAtEnd("PositionalLight0");
+		v->linkEntityAtEnd("mappedterrain");
+		v->linkEntityAtEnd("grid1");
+		//v->linkEntityAtEnd("terrain");
+		v->linkEntityAtEnd("Ninja");
+		
+	}
+}

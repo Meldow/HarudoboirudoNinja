@@ -1,0 +1,13 @@
+#include "Collidable.h"
+
+namespace proj {
+
+	Collidable::Collidable() {
+		_isColliding = false;
+	}
+	Collidable::~Collidable() {}
+
+	void Collidable::isColliding(bool isColliding) {
+		_isColliding = isColliding;
+	}
+}

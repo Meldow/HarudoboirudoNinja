@@ -1,0 +1,24 @@
+#ifndef DIRECTIONAL_LIGHT_H
+#define DIRECTIONAL_LIGHT_H
+
+#include <string>
+#include "cg/cg.h"
+#include "Light.h"
+#include "DebugManager.h"
+
+namespace proj {
+
+	class DirectionalLight : public Light
+	{
+	private:
+		void makeLight();
+
+	public:
+		DirectionalLight(std::string id);
+		~DirectionalLight();
+
+		void init();
+	};
+}
+
+#endif

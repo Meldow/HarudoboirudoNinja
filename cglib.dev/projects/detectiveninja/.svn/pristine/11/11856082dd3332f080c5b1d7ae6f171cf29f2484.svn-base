@@ -1,0 +1,30 @@
+#ifndef MENU_MANAGER_H
+#define MENU_MANAGER_H
+
+
+#include <string.h>
+#include <list>
+#include "cg/cg.h"
+#include "Menu.h"
+#include "MainMenu.h"
+
+namespace proj {
+
+	class MenuManager : public cg::Entity
+	{
+	private:
+		std::list<Menu*>* _menus;
+		Menu* _currentMenu;
+	public:
+		MenuManager();
+		~MenuManager();
+		void init();
+		void add(Menu* m);
+		void clear();
+		Menu* get(std::string name);
+		void goToMenu(Menu* m);
+		void goToMenuByName(std::string menuName);
+	};
+}
+
+#endif

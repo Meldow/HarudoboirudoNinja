@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\ExitToMainMenuCommand.cpp" />
+    <ClCompile Include="..\..\src\Level2.cpp" />
+    <ClCompile Include="..\..\src\LoadLevel1Command.cpp" />
+    <ClCompile Include="..\..\src\LoadLevel2Command.cpp" />
+    <ClCompile Include="..\..\src\LoseMenu.cpp" />
+    <ClCompile Include="..\..\src\MainMenuCommand.cpp" />
+    <ClCompile Include="..\..\src\BoundingSphere.cpp" />
+    <ClCompile Include="..\..\src\Camera.cpp" />
+    <ClCompile Include="..\..\src\CameraMode.cpp" />
+    <ClCompile Include="..\..\src\Collidable.cpp" />
+    <ClCompile Include="..\..\src\CollisionManager.cpp" />
+    <ClCompile Include="..\..\src\Command.cpp" />
+    <ClCompile Include="..\..\src\Controller.cpp" />
+    <ClCompile Include="..\..\src\Debug.cpp" />
+    <ClCompile Include="..\..\src\DebugManager.cpp" />
+    <ClCompile Include="..\..\src\Enemy.cpp" />
+    <ClCompile Include="..\..\src\ExitToDesktopCommand.cpp" />
+    <ClCompile Include="..\..\src\FreeCamera.cpp" />
+    <ClCompile Include="..\..\src\ImageLoaderHeightMap.cpp" />
+    <ClCompile Include="..\..\src\ImageLoaderItemMap.cpp" />
+    <ClCompile Include="..\..\src\InGameMenu.cpp" />
+    <ClCompile Include="..\..\src\Level.cpp" />
+    <ClCompile Include="..\..\src\Level1.cpp" />
+    <ClCompile Include="..\..\src\LevelManager.cpp" />
+    <ClCompile Include="..\..\src\LevelSelectMenu.cpp" />
+    <ClCompile Include="..\..\src\LevelSelectMenuCommand.cpp" />
+    <ClCompile Include="..\..\src\Light.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\MainApp.cpp" />
+    <ClCompile Include="..\..\src\MainCamera.cpp" />
+    <ClCompile Include="..\..\src\MainMenu.cpp" />
+    <ClCompile Include="..\..\src\Material.cpp" />
+    <ClCompile Include="..\..\src\MaterialManager.cpp" />
+    <ClCompile Include="..\..\src\Menu.cpp" />
+    <ClCompile Include="..\..\src\MenuManager.cpp" />
+    <ClCompile Include="..\..\src\NewGameCommand.cpp" />
+    <ClCompile Include="..\..\src\Ninja.cpp" />
+    <ClCompile Include="..\..\src\ObjectClue.cpp" />
+    <ClCompile Include="..\..\src\ObjectSexyMagazine.cpp" />
+    <ClCompile Include="..\..\src\ObjectStaticBox.cpp" />
+    <ClCompile Include="..\..\src\Physics.cpp" />
+    <ClCompile Include="..\..\src\ResetLevelCommand.cpp" />
+    <ClCompile Include="..\..\src\Scene.cpp" />
+    <ClCompile Include="..\..\src\Skybox.cpp" />
+    <ClCompile Include="..\..\src\Texture.cpp" />
+    <ClCompile Include="..\..\src\TextureManager.cpp" />
+    <ClCompile Include="..\..\src\ToggleDebugCommand.cpp" />
+    <ClCompile Include="..\..\src\WaypointEnemy.cpp" />
+    <ClCompile Include="..\..\src\WonLevelMenu.cpp" />
+    <ClCompile Include="..\..\src\WorldObject.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\BoundingSphere.h" />
+    <ClInclude Include="..\..\src\Camera.h" />
+    <ClInclude Include="..\..\src\CameraMode.h" />
+    <ClInclude Include="..\..\src\Collidable.h" />
+    <ClInclude Include="..\..\src\CollisionManager.h" />
+    <ClInclude Include="..\..\src\Command.h" />
+    <ClInclude Include="..\..\src\Controller.h" />
+    <ClInclude Include="..\..\src\Debug.h" />
+    <ClInclude Include="..\..\src\DebugManager.h" />
+    <ClInclude Include="..\..\src\Enemy.h" />
+    <ClInclude Include="..\..\src\ExitToDesktopCommand.h" />
+    <ClInclude Include="..\..\src\ExitToMainMenuCommand.h" />
+    <ClInclude Include="..\..\src\FreeCamera.h" />
+    <ClInclude Include="..\..\src\ImageLoaderHeightMap.h" />
+    <ClInclude Include="..\..\src\ImageLoaderItemMap.h" />
+    <ClInclude Include="..\..\src\InGameMenu.h" />
+    <ClInclude Include="..\..\src\ITargetable.h" />
+    <ClInclude Include="..\..\src\Level.h" />
+    <ClInclude Include="..\..\src\Level1.h" />
+    <ClInclude Include="..\..\src\Level2.h" />
+    <ClInclude Include="..\..\src\LevelManager.h" />
+    <ClInclude Include="..\..\src\LevelSelectMenu.h" />
+    <ClInclude Include="..\..\src\LevelSelectMenuCommand.h" />
+    <ClInclude Include="..\..\src\Light.h" />
+    <ClInclude Include="..\..\src\LoadLevel1Command.h" />
+    <ClInclude Include="..\..\src\LoadLevel2Command.h" />
+    <ClInclude Include="..\..\src\LoseMenu.h" />
+    <ClInclude Include="..\..\src\MainApp.h" />
+    <ClInclude Include="..\..\src\MainCamera.h" />
+    <ClInclude Include="..\..\src\MainMenu.h" />
+    <ClInclude Include="..\..\src\MainMenuCommand.h" />
+    <ClInclude Include="..\..\src\Material.h" />
+    <ClInclude Include="..\..\src\MaterialManager.h" />
+    <ClInclude Include="..\..\src\Menu.h" />
+    <ClInclude Include="..\..\src\MenuManager.h" />
+    <ClInclude Include="..\..\src\NewGameCommand.h" />
+    <ClInclude Include="..\..\src\Ninja.h" />
+    <ClInclude Include="..\..\src\ObjectClue.h" />
+    <ClInclude Include="..\..\src\ObjectSexyMagazine.h" />
+    <ClInclude Include="..\..\src\ObjectStaticBox.h" />
+    <ClInclude Include="..\..\src\Physics.h" />
+    <ClInclude Include="..\..\src\ResetLevelCommand.h" />
+    <ClInclude Include="..\..\src\Scene.h" />
+    <ClInclude Include="..\..\src\Skybox.h" />
+    <ClInclude Include="..\..\src\Texture.h" />
+    <ClInclude Include="..\..\src\TextureManager.h" />
+    <ClInclude Include="..\..\src\ToggleDebugCommand.h" />
+    <ClInclude Include="..\..\src\WaypointEnemy.h" />
+    <ClInclude Include="..\..\src\WonLevelMenu.h" />
+    <ClInclude Include="..\..\src\WorldObject.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\ColorScheme.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4D0A7FDA-03FF-4360-A028-E159EA7F678A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>detectiveninja</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\..\bin\</OutDir>
+    <IntDir>..\..\obj\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\..\bin\</OutDir>
+    <IntDir>..\..\obj\$(Configuration)\</IntDir>
+    <ExtensionsToDeleteOnClean>*.log;*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml</ExtensionsToDeleteOnClean>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\dependencies\freeglut\include;..\..\..\..\dependencies\freeimage\include;..\..\..\..\cglib\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\dependencies\freeglut\lib;..\..\..\..\dependencies\freeimage\lib;..\..\..\..\cglib\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;freeimage.lib;cglib_d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\dependencies\freeglut\include;..\..\..\..\dependencies\freeimage\include;..\..\..\..\cglib\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\dependencies\freeglut\lib;..\..\..\..\dependencies\freeimage\lib;..\..\..\..\cglib\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;freeimage.lib;cglib.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

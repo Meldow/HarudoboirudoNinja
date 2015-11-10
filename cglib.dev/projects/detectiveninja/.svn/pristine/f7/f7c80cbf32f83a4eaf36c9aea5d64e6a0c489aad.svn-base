@@ -1,0 +1,72 @@
+#include "PositionalLight.h"
+
+namespace proj {
+
+	PositionalLight::PositionalLight(std::string id, GLenum lightConstant, float position[], float direction[]) : Light(id) {
+		
+		// assert((lightConstant > GL_LIGHT0) && (lightConstant <= GL_LIGHT7));
+		
+		_lightConstant = lightConstant;
+		makeLight(position, direction);
+	}
+
+	PositionalLight::~PositionalLight() {}
+
+	void PositionalLight::init() {
+
+		// values by default
+
+		_physics.setPosition(0.0, 0.0, 30.0);
+		_physics.setLinearVelocity(25.0);
+		_physics.setAngularVelocity(100.0);
+		_physics.setAxesScale(10.0);
+
+		GLfloat ambient[] =	{ 0.1f, 0.1f, 0.1f, 1.0f };
+		GLfloat diffuse[] =	{ 0.9f, 0.9f, 0.9f, 1.0f };
+		GLfloat specular[] = { 0.9f, 0.9f, 0.9f, 1.0f };
+
+		glLightfv(_lightConstant, GL_AMBIENT, ambient);
+		glLightfv(_lightConstant, GL_DIFFUSE, diffuse);
+		glLightfv(_lightConstant, GL_SPECULAR, specular);
+		glLightf(_lightConstant, GL_SPOT_CUTOFF, 45.0f);
+
+		glEnable(_lightConstant);
+		_lightOn = true;
+
+		switch(_lightConstant) {
+			case GL_LIGHT1:
+				_controlLightKey = '1';
+				break;
+			case GL_LIGHT2:
+				_controlLightKey = '2';
+				break;
+			case GL_LIGHT3:
+				_controlLightKey = '3';
+				break;
+			case GL_LIGHT4:
+				_controlLightKey = '4';
+				break;
+			case GL_LIGHT5:
+				_controlLightKey = '5';
+				break;
+			case GL_LIGHT6:
+				_controlLightKey = '6';
+				break;
+			case GL_LIGHT7:
+				_controlLightKey = '7';
+				break;
+		}
+	}
+
+	inline
+	void PositionalLight::makeLight(float position[], float direction[]) {
+
+		_lightDL = glGenLists(1);
+		assert(_lightDL != 0);
+
+		glNewList(_lightDL,GL_COMPILE);
+			glLightfv(_lightConstant, GL_POSITION, position);
+			glLightfv(_lightConstant, GL_SPOT_DIRECTION, direction);
+		glEndList();
+	}
+}

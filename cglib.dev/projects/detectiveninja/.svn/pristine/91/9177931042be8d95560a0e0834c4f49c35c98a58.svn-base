@@ -1,0 +1,29 @@
+#ifndef LEVEL_H
+#define LEVEL_H
+
+#include <list>
+#include "Material.h"
+#include "Texture.h"
+
+namespace proj {
+
+	class Level : public cg::Entity
+	{
+	protected:
+		int levelNumber;
+		std::string levelName;
+		std::list<Texture*> _levelTexs;
+		std::list<Material*> _levelMats;
+		int totalClues;
+	public:
+		Level(int nr, std::string name, int totClues);
+		~Level();
+		void init();
+		int getTotalClues();
+		std::list<Texture*>* getTextures();
+		std::list<Material*>* getMaterials();
+	};
+}
+
+
+#endif

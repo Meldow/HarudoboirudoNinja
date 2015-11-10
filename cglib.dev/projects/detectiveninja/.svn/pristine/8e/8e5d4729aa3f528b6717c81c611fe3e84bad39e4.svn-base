@@ -1,0 +1,32 @@
+#ifndef BOX_GREEN_H
+#define BOX_GREEN_H
+/*
+#define V3FUNCCOMPONENTS(x) \ 
+	x[0], x[1], x[2]
+	*/
+#include <string>
+#include "cg/cg.h"
+
+namespace proj {
+
+	class BoxGreen : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener
+	{
+	private:
+		cg::Vector3d _position;
+
+	public:
+		BoxGreen(std::string id, cg::Vector3d position);
+		~BoxGreen();
+		
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+		
+		cg::Vector3d getPosition();
+	};
+}
+
+
+#endif

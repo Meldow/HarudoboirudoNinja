@@ -1,0 +1,56 @@
+#ifndef IMAGE_LOADER_ITEM_MAP
+#define IMAGE_LOADER_ITEM_MAP
+
+#include "cg/cg.h"
+#include <windows.h>
+#include <stdio.h>
+#include <gl\gl.h>
+#include <gl\glu.h>
+#include "MainApp.h"
+#include "Ninja.h"
+#include "Enemy.h"
+#include "WaypointEnemy.h"
+#include "ImageLoaderHeightMap.h"
+#include "Light.h"
+#include "ObjectClue.h"
+#include "ObjectStaticBox.h"
+#include "ObjectSexyMagazine.h"
+
+#pragma comment(lib, "opengl32.lib")					// Link OpenGL32.lib
+#pragma comment(lib, "glu32.lib")						// Link Glu32.lib
+
+#define		MAP_SIZE	  600							// Size Of Our .RAW Height Map
+#define		STEP_SIZE_ITEM	  20							// Width And Height Of Each Quad - quanto menor este valor, melhor, aumenta peso exponencial
+#define		HEIGHT_RATIO  1.0f							// Ratio That The Y Is Scaled According To The X And Z
+
+namespace proj {
+
+	class ImageLoaderItemMap : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener
+	{
+	private:
+		
+		BYTE g_ItemMap[MAP_SIZE*MAP_SIZE];						// Holds The Item Map Data
+		BYTE g_HeightMap[MAP_SIZE*MAP_SIZE];
+
+		std::string _objectFile;
+		std::string _mapFile;
+		
+	public:
+		ImageLoaderItemMap (std::string id);
+		ImageLoaderItemMap (std::string id, std::string mapFile, std::string objectFile);
+		~ImageLoaderItemMap();
+		
+		void init();
+		void setup();
+		void update(unsigned long elapsed_millis);
+		void draw();
+		void LoadRawFile(std::string strName, int nSize, BYTE *g_ItemMap);
+		int Height(BYTE *g_ItemMap, int X, int Y);
+		void setItems(BYTE *g_ItemMap);
+		void setItemMap(std::string mapname, std::string itemmap);
+	};
+}
+
+#endif

@@ -1,0 +1,14 @@
+#include "InGameMenu.h"
+
+namespace proj {
+	InGameMenu::InGameMenu() : Menu("InGameMenu"){
+		_commands->push_back(new MainMenuCommand());
+		_commands->push_back(new ExitToDesktopCommand());
+	}
+	InGameMenu::~InGameMenu() {
+	}
+
+	void InGameMenu::init() {
+		//Menu::init();
+	}
+}

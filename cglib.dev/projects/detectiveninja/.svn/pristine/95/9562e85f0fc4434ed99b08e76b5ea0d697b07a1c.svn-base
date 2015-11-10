@@ -1,0 +1,22 @@
+#ifndef SCENE_H
+#define SCENE_H
+
+#include <string>
+#include "cg/cg.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class Scene : public cg::Entity,
+		public cg::IDrawListener
+	{
+	public:
+		Scene();
+		~Scene();
+		void init();
+		void draw();
+		void drawOverlay();
+	};
+}
+
+#endif

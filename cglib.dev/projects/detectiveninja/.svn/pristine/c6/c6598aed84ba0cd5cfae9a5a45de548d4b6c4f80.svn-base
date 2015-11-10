@@ -1,0 +1,29 @@
+#ifndef OBJECT_H
+#define OBJECT_H
+
+#include <string>
+#include "cg/cg.h"
+
+namespace proj {
+
+	class Object : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener
+	{
+	private:
+		cg::Vector3d _position;
+
+	public:
+		Object(std::string id, cg::Vector3d position);
+		~Object();
+		
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+		
+		cg::Vector3d getPosition();
+	};
+}
+
+
+#endif

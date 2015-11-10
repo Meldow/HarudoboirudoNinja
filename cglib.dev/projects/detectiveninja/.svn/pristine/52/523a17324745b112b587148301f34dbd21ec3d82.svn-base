@@ -1,0 +1,39 @@
+#ifndef LIGHT_H
+#define LIGHT_H
+
+#include "cg/cg.h"
+#include "Physics.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class Light : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener,
+		public Debug
+	{
+	private:
+		void toggleLight();
+
+	protected:
+		GLenum _lightConstant;
+		Physics _physics;
+		int _lightDL;
+
+		// DEBUG
+		bool _lightOn;
+		char _controlLightKey;
+		bool _toggleLightKeyReleased;
+		cg::Vector3f _position;
+
+	public:
+		Light(std::string id);
+		~Light();
+		
+		virtual void init() = 0;
+		void update(unsigned long elapsed_millis);
+		void draw();
+	};
+}
+
+#endif

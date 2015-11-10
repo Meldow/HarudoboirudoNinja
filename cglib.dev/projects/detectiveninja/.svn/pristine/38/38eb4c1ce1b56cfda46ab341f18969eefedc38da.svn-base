@@ -1,0 +1,32 @@
+#include "WaypointEnemy.h"
+
+namespace proj {
+
+	WaypointEnemy::WaypointEnemy(std::string id, cg::Vector3d position) : cg::Entity(id) {
+		_position = position;
+	}
+	WaypointEnemy::~WaypointEnemy() {
+	}
+
+	void WaypointEnemy::init() {
+	}
+
+	void WaypointEnemy::update(unsigned long elapsed_millis) {
+		double elapsed_seconds = elapsed_millis / (double)1000; //tempo (time = Time.deltaTime), numero de segundos q passou do ultimo frame
+	}
+
+	void WaypointEnemy::draw() {
+		//printf("BoxRed:: Drawing BoxRed\n");
+		glPushMatrix();
+		glTranslatef(_position[0], _position[1], _position[2]+(30/2));
+			glColor3f(1.0f,0.0f,0.0f);
+			glutSolidCube(30);
+		glPopMatrix();
+	}
+
+	cg::Vector3d WaypointEnemy::getPosition(){
+		return _position;
+	}
+	
+	
+}

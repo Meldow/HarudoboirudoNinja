@@ -1,0 +1,64 @@
+#ifndef NINJA_H
+#define NINJA_H
+
+#include <string>
+#include "cg/cg.h"
+#include "Physics.h"
+#include "ITargetable.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class Ninja : public cg::Entity,
+		public cg::IUpdateListener,
+		public cg::IDrawListener,
+		public ITargetable,
+		public Debug
+	{
+	private:
+		Physics _physics;
+		bool _isRunning;
+		bool _jumpKeyReleased;
+
+		float _hatCenterWidth, _hatCenterLength, _hatCenterHeight;
+		float _hatMiddleWidth, _hatMiddleLength, _hatMiddleHeight;
+		float _headWidth, _headLength, _headHeight;
+		float _bodyWidth, _bodyLength, _bodyHeight;
+		float _armWidth, _armLength, _armHeight;
+		float _legWidth, _legLength, _legHeight;
+
+		float _bodyAngle, _armAngle[2], _legAngle[2];
+		cg::Vector3f _armRotationVector[2], _legRotationVector[2];
+		bool _legDirection[2];	// true if moving forward; false if moving backwards
+
+		void unitCube();
+		void cube(int n,
+			double x0, double y0, double x1, double y1,
+			double nx, double ny, double nz,
+			double tx0, double ty0, double tx1, double ty1);
+		void dividedPlane(int n,
+			double x0, double y0, double x1, double y1,
+			double nx, double ny, double nz,
+			double tx0, double ty0, double tx1, double ty1);
+		void updateAngles();
+
+		// DEBUG
+		bool _boundingSpheresOn;
+		bool _boundingSpheresKeyReleased;
+		void toggleBoundingSpheres();
+
+	public:
+		Ninja(std::string id);
+		~Ninja();
+
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+
+		// ITargetable
+		cg::Vector3d getPosition();
+		void toggleDebug();
+	};
+}
+
+#endif

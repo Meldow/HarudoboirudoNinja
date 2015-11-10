@@ -1,0 +1,302 @@
+#include "ImageLoaderItemMap.h"
+
+namespace proj {
+	
+	ImageLoaderItemMap::ImageLoaderItemMap(std::string id) : cg::Entity(id) {}
+	
+	ImageLoaderItemMap::ImageLoaderItemMap (std::string id, std::string mapFile, std::string objectFile) : cg::Entity(id) {
+		_mapFile = mapFile;
+		_objectFile = objectFile;
+	}
+	
+	ImageLoaderItemMap::~ImageLoaderItemMap() {}
+
+	void ImageLoaderItemMap::init() {
+		setup();
+	}
+
+	void ImageLoaderItemMap::setup(){
+		printf("-------- Item Map --------\n");
+		printf("LOADING ITEMMAP...\n");
+		LoadRawFile(_objectFile, MAP_SIZE * MAP_SIZE, g_ItemMap);
+		LoadRawFile(_mapFile, MAP_SIZE * MAP_SIZE, g_HeightMap); 
+		setItems(g_ItemMap);
+		printf("ITEMMAP LOADED.\n");
+	}
+
+	void ImageLoaderItemMap::draw(){}
+	void ImageLoaderItemMap::update(unsigned long elapsed_millis) {}
+
+	void ImageLoaderItemMap::LoadRawFile(std::string strName, int nSize, BYTE *pItemMap)
+	{
+		FILE *pFile = NULL;
+
+		// Open The File In Read / Binary Mode.
+		pFile = fopen( strName.c_str(), "rb" );
+
+		// Check To See If We Found The File And Could Open It
+		if ( pFile == NULL )	
+		{
+			// Display Error Message And Stop The Function
+			//printf(NULL, "Can't Find The Height Map!", "Error", MB_OK);
+			printf("ImageLoaderItemMap: Can't Find The Height Map!\n");
+			return;
+		}
+
+		fread( pItemMap, 1, nSize, pFile );
+
+		// After We Read The Data, It's A Good Idea To Check If Everything Read Fine
+		int result = ferror( pFile );
+
+		// Check If We Received An Error
+		if (result)
+		{
+			//printf(NULL, "Failed To Get Data!", "Error", MB_OK);
+			printf("ImageLoaderItemMap: Failed To Get Data!\n");
+		}
+
+		// Close The File.
+		fclose(pFile);
+		printf("ImageLoaderItemMap: Item data collected sucessfully.\n");
+	}
+
+	int ImageLoaderItemMap::Height(BYTE *pItemMap, int X, int Y)				// This Returns The Height From A Height Map Index
+	{
+		int x = X % MAP_SIZE;								// Error Check Our x Value
+		int y = Y % MAP_SIZE;								// Error Check Our y Value
+
+		if(!pItemMap) return 0;							// Make Sure Our Data Is Valid
+		
+		return pItemMap[x + (y * MAP_SIZE)];				// Index Into Our Height Array And Return The Height	
+	}
+
+	void ImageLoaderItemMap::setItems(BYTE *pItemMap) {
+		int X = 0, Y = 0, Z = 0;
+		
+		int boxredcount = 0, boxpinkcount = 0, boxgreencount = 0, boxbluecount = 0;
+		int playercount = 0, enemycount = 0;
+		int objectcluecount = 0, positionallightcount = 0;
+		int staticboxcount = 0, sexymagazinecount = 0;
+		int positionallightnumber = 0x4000-1;
+	
+		Enemy* _newEnemy;
+		BoxRed* _newWaypoint;
+
+
+		std::string result;
+
+		for ( X = 0; X < MAP_SIZE; X += STEP_SIZE_ITEM )
+		{
+			for ( Y = 0; Y < MAP_SIZE; Y += STEP_SIZE_ITEM )
+			{
+				//Input: 90; reads 69; 80%
+				//if (Height(pItemMap, X, Y ) > 5 && Height(pItemMap, X, Y ) < 64  ) {
+				//	
+				//	printf("data: %d\t", Height(pItemMap, X, Y ) );
+				//	std::stringstream sstm;
+				//	sstm << "Ninja";
+				//	result = sstm.str();
+				//	printf("id:");
+				//	std::cout<<result;
+				//	printf("\t");
+
+				//	Z = (float)Height(g_HeightMap, X, Y);
+				//	printf("ImageLoaderItemMap::setItem:Ninja%d at %d %d %d\n",playercount, X, Y, Z);
+				//	cg::Registry::instance()->add(new Ninja("Ninja", cg::Vector3d(X,Y,Z)));
+				//	dynamic_cast<Ninja*> (cg::Registry::instance()->get(result))->init();
+				//	cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+				//	view->linkEntityAtEnd(result);
+				//	playercount++;
+				//}
+
+				//test input
+				//if (Height(pItemMap, X, Y ) > 20  ) {
+				//	printf("data collected: %d\t\n", Height(pItemMap, X, Y ) );	
+				//}
+
+				if (Height(pItemMap, X, Y ) > 65 && Height(pItemMap, X, Y ) < 70  ) {
+					
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "enemy" << enemycount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					//printf("ImageLoaderItemMap::setItem:enemy%d at %d %d %d\n",enemycount, X, Y, Z);
+					
+					_newEnemy = new Enemy(result, cg::Vector3d(X, Y, Z));
+					cg::Registry::instance()->add(_newEnemy);
+					dynamic_cast<Enemy*> (cg::Registry::instance()->get(result))->init();
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					enemycount++;
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+				
+				//THIS IS OUR WAYPOINT
+				if (Height(pItemMap, X, Y ) > 71 && Height(pItemMap, X, Y ) < 90  ) {
+					boxredcount++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "path" << boxredcount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					printf("ImageLoaderItemMap::setItem:BoxRed%d at %d %d %d\n",boxredcount, X, Y, Z);
+
+					_newWaypoint = new BoxRed(result, cg::Vector3d(X, Y, Z));
+
+					cg::Registry::instance()->add(_newWaypoint);
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					
+					_newEnemy->addPath(_newWaypoint);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+ 				}
+				
+				if (Height(pItemMap, X, Y ) > 91 && Height(pItemMap, X, Y ) < 110  ) {
+					staticboxcount++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "staticbox" << staticboxcount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					printf("ImageLoaderItemMap::setItem:StaticBox%d at %d %d %d\n",staticboxcount, X, Y, Z);
+					cg::Registry::instance()->add(new ObjectStaticBox(result, cg::Vector3d(X, Y, Z), 10.0));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+
+				if (Height(pItemMap, X, Y ) > 111 && Height(pItemMap, X, Y ) < 125  ) {
+					boxgreencount++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "boxgreen" << boxgreencount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					printf("ImageLoaderItemMap::setItem:BoxGreen%d at %d %d %d\n",boxgreencount, X, Y, Z);
+					cg::Registry::instance()->add(new BoxGreen(result, cg::Vector3d(X, Y, Z)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+
+				//Input: 155; reads 134; 47%
+				if (Height(pItemMap, X, Y ) > 126 && Height(pItemMap, X, Y ) < 145  ) {
+					boxbluecount++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "boxblue" << boxbluecount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					printf("ImageLoaderItemMap::setItem:BoxBlue%d at %d %d %d\n",boxbluecount, X, Y, Z);
+					cg::Registry::instance()->add(new BoxBlue(result, cg::Vector3d(X, Y, Z)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+
+				//Input: 170; reads 151; 41%
+				if (Height(pItemMap, X, Y ) > 145 && Height(pItemMap, X, Y ) < 155  ) {
+					objectcluecount++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "objectclue" << objectcluecount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					printf("ImageLoaderItemMap::setItem:ObjectClue%d at %d %d %d\n",objectcluecount, X, Y, Z);
+					cg::Registry::instance()->add(new ObjectClue(result, cg::Vector3d(X, Y, Z)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addClue();
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+
+				//Input: 189; reads ??; 32%
+				if (Height(pItemMap, X, Y ) > 155 && Height(pItemMap, X, Y ) < 195  ) {
+					Z = (float)Height(g_HeightMap, X, Y) + 20;
+					float light0position[] = { X, Y, Z, 1.0 };
+					float light0direction[] = { 0.0, 0.0, -1.0 };
+
+					positionallightcount++;
+					positionallightnumber++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "positionallight" << positionallightcount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					printf("ImageLoaderItemMap::setItem:PositionalLight%d at %d %d %d\n",positionallightcount, X, Y, Z);
+					cg::Registry::instance()->add((new PositionalLight(result, positionallightnumber, light0position, light0direction)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+
+				if (Height(pItemMap, X, Y ) > 196 && Height(pItemMap, X, Y ) < 210 ) {
+					sexymagazinecount++;
+					printf("data: %d\t", Height(pItemMap, X, Y ) );
+					std::stringstream sstm;
+					sstm << "sexymagazine" << sexymagazinecount;
+					result = sstm.str();
+					printf("id:");
+					std::cout<<result;
+					printf("\t");
+
+					Z = (float)Height(g_HeightMap, X, Y);
+					printf("ImageLoaderItemMap::setItem:SexyMagazine %d at %d %d %d\n",sexymagazinecount, X, Y, Z);
+					cg::Registry::instance()->add(new ObjectSexyMagazine(result, cg::Vector3d(X, Y, Z)));
+					cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+					view->linkEntityAtEnd(result);
+					dynamic_cast<LevelManager*> (cg::Registry::instance()->get("LevelManager"))->addEntity(result);
+				}
+				
+			}
+		}
+		
+		printf("ImageLoaderItemMap::Drawing %d Player\n", playercount);
+		printf("ImageLoaderItemMap::Drawing %d Enemy\n", enemycount);
+		printf("ImageLoaderItemMap::Drawing %d BoxRed\n", boxredcount);
+		printf("ImageLoaderItemMap::Drawing %d StaticBox\n", staticboxcount);
+		printf("ImageLoaderItemMap::Drawing %d BoxBlue\n", boxbluecount);
+		printf("ImageLoaderItemMap::Drawing %d BoxGreen\n", boxgreencount);
+		printf("ImageLoaderItemMap::Drawing %d ObjectClue\n", objectcluecount);
+		printf("ImageLoaderItemMap::Drawing %d PositionalLights\n", positionallightcount);
+		printf("ImageLoaderItemMap::Drawing %d ObjecySexyMagazine\n", sexymagazinecount);
+	}
+
+	void ImageLoaderItemMap::setItemMap(std::string mapname, std::string itemmap){
+		_mapFile = mapname;
+		_mapFile = itemmap;
+		setup();
+	}
+
+	
+}
+
+

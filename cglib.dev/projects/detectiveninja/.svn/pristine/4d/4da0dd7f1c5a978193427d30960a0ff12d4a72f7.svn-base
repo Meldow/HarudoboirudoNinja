@@ -1,0 +1,46 @@
+#ifndef CAMERA_MODE_H
+#define CAMERA_MODE_H
+
+#include <string>
+#include "cg/cg.h"
+
+#define MIN_CAM_X 0 
+#define	MIN_CAM_Y 0 
+#define	MIN_CAM_Z 0
+#define	MAX_CAM_X 600
+#define	MAX_CAM_Y 600
+#define	MAX_CAM_Z 350
+
+namespace proj {
+
+    class CameraMode : public cg::Entity, 
+		public cg::IDrawListener,
+		public cg::IReshapeEventListener,
+		public cg::IMouseEventListener,
+		public cg::IUpdateListener
+
+	{
+    protected:
+		cg::Vector2d _winSize;
+		cg::Vector3d _position;
+		cg::Vector3d _up,_front,_right;
+		cg::Quaterniond _orientation, _q;
+		cg::Vector2d _lastMousePosition;
+		bool _isRoll;
+
+    public:
+        CameraMode(const std::string id);
+        virtual ~CameraMode();
+        virtual void init();
+        virtual void draw();
+        virtual void onReshape(int width, int height);
+        virtual void onMouse(int button, int state, int x, int y);
+        virtual void onMouseMotion(int x, int y);
+        virtual void onMousePassiveMotion(int x, int y);
+		virtual void update(unsigned long elapsed_millis);
+		virtual std::string getType();
+		void limitPosition();
+	};
+}
+
+#endif

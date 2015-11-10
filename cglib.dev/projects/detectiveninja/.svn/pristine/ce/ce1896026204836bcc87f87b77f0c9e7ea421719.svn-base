@@ -1,0 +1,25 @@
+#ifndef COLLIDABLE_H
+#define COLLIDABLE_H
+
+#include "cg/cg.h"
+
+namespace proj {
+
+	class Collidable 
+	{
+	protected:
+		bool _isColliding;
+
+	public:
+		Collidable();
+		~Collidable();
+
+		virtual cg::Vector3d getPosition() = 0;
+		virtual cg::Vector3d getVelocity() = 0;
+		virtual double getBoundingSphereRadius() = 0;
+
+		void isColliding(bool isColliding);
+	};
+}
+
+#endif

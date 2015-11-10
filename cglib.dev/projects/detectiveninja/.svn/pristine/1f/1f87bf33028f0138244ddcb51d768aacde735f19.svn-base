@@ -1,0 +1,23 @@
+#include "BoundingSphere.h"
+
+namespace proj {
+
+	BoundingSphere::BoundingSphere(float radius, cg::Vector3d position) {
+		_radius = radius;
+		_position = position;
+	}
+
+	BoundingSphere::~BoundingSphere() {}
+
+	void BoundingSphere::updatePosition(cg::Vector3d newPosition) {
+		_position = newPosition;
+	}
+	
+	cg::Vector3d BoundingSphere::getPosition() {
+		return _position;
+	}
+	
+	float BoundingSphere::getRadius() {
+		return _radius;
+	}
+}

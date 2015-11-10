@@ -1,0 +1,26 @@
+#include "MainTerrain.h"
+
+namespace proj {
+
+	MainTerrain::MainTerrain(const std::string& id) : cg::Entity(id) {}
+	MainTerrain::~MainTerrain() {}
+	
+	void MainTerrain::init() {
+
+		_terrainWidth = 1024.0f;
+		_terrainLength = 1024.0f;
+		_terrainHeight = 10.0f;
+	}
+
+	void MainTerrain::draw() {
+		
+		glPushMatrix();
+
+		glColor3f(0.1f,0.5f,0.2f);
+		glTranslatef(0.0f, 0.0f, -_terrainHeight / 2);
+		glScalef(_terrainWidth, _terrainLength, _terrainHeight);
+		glutSolidCube(1.0);
+
+		glPopMatrix();
+	}
+}

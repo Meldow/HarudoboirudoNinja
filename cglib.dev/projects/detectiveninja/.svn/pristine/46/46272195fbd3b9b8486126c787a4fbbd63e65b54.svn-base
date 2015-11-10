@@ -1,0 +1,62 @@
+#ifndef ENEMY_H
+#define ENEMY_H
+
+#include <string>
+#include "cg/cg.h"
+#include "Physics.h"
+#include "ITargetable.h"
+#include "Collidable.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class Enemy : public cg::Entity,
+		public cg::IUpdateListener,
+		public cg::IDrawListener,
+		public ITargetable,
+		public Collidable,
+		public Debug
+	{
+	private:
+		Physics _physics;
+		bool _isRunning;
+		bool _jumpKeyReleased;
+
+		float _headWidth, _headLength, _headHeight;
+		float _bodyWidth, _bodyLength, _bodyHeight;
+		float _armWidth, _armLength, _armHeight;
+		float _legWidth, _legLength, _legHeight;
+
+		float _bodyAngle, _armAngle[2], _legAngle[2];
+		cg::Vector3f _armRotationVector[2], _legRotationVector[2];
+		bool _legDirection[2];	// true if moving forward; false if moving backwards
+
+		void unitCube();
+		void cube(int n,
+			double x0, double y0, double x1, double y1,
+			double nx, double ny, double nz,
+			double tx0, double ty0, double tx1, double ty1);
+		void dividedPlane(int n,
+			double x0, double y0, double x1, double y1,
+			double nx, double ny, double nz,
+			double tx0, double ty0, double tx1, double ty1);
+		void updateAngles();
+
+	public:
+		Enemy(std::string id, cg::Vector3d position);
+		~Enemy();
+
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+
+		// ITargetable
+		cg::Vector3d getPosition();
+		void toggleDebug();
+
+		// Collidable
+		void updateBoundingSpheresPosition();
+	};
+}
+
+#endif

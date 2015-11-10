@@ -1,0 +1,100 @@
+#include "LevelManager.h"
+
+namespace proj {
+
+	LevelManager::LevelManager() : Entity("LevelManager") {
+		_currentClues = 0;
+		_currentEntities = new std::list<std::string>();
+	}
+	LevelManager::~LevelManager() {}
+	
+	void LevelManager::init() {
+		
+		
+	}
+
+	void LevelManager::onClueGet() {
+		_currentClues++;
+		
+		//checks if level is over
+		if(_currentClues == _currentLevel->getTotalClues()) {
+			Scene* scene = dynamic_cast<Scene*>( cg::Registry::instance()->get("Scene"));
+			scene->onWin();
+		}
+	}
+	
+	void LevelManager::loadLevel(Level* lvl) {
+		printf("STARTING TO LOAD LEVEL \n" );
+		
+		_currentLevel = lvl;
+		_currentClues = 0;
+		MaterialManager* materialManager = dynamic_cast<MaterialManager*>(cg::Registry::instance()->get("MaterialManager"));
+		TextureManager* textureManager = dynamic_cast<TextureManager*>(cg::Registry::instance()->get("TextureManager"));
+		
+		
+		materialManager->clear();
+		std::list<Material*>::iterator matit;
+		for(matit = lvl->getMaterials()->begin(); matit != lvl->getMaterials()->end(); matit++) {
+			materialManager->add(*matit);
+		}
+
+		textureManager->clear();
+		std::list<Texture*>::iterator texit;
+		for(texit = lvl->getTextures()->begin(); texit != lvl->getTextures()->end(); texit++) {
+			textureManager->add(*texit);
+		}
+
+		//clearing old ones (if ther are any)
+		std::list<std::string>::iterator entitiesit;
+		for(entitiesit = _currentEntities->begin(); entitiesit != _currentEntities->end(); entitiesit++) {
+			cg::Registry::instance()->remove(*entitiesit);
+		}
+		cg::Registry::instance()->remove("mappedterrain");
+		cg::Registry::instance()->remove("mappeditems");
+		_currentEntities->clear();
+
+		ImageLoaderHeightMap* ilhm = new ImageLoaderHeightMap("mappedterrain", LEVEL_PATH + _currentLevel->getHeightMap());
+		ImageLoaderItemMap* ilim = new ImageLoaderItemMap("mappeditems", LEVEL_PATH + _currentLevel->getHeightMap(), LEVEL_PATH + _currentLevel->getItemMap());
+		cg::Registry::instance()->add(ilhm);
+		cg::Registry::instance()->add(ilim);
+		
+
+		/*
+		cg::View *view = (cg::View*) cg::Registry::instance()->get("view1");
+		view->linkEntityAtEnd("mappedterrain");
+		*/
+		printf("LEVEL LOADED\n");
+	
+	}
+
+	void LevelManager::restartLevel() {
+		_currentClues = 0;
+
+		//reactivate all clues
+	}
+
+	int LevelManager::getTotalClues() {
+		return _currentLevel->getTotalClues();
+	}
+
+	int LevelManager::getCurrentClues() {
+		return _currentClues;
+	}
+
+	void LevelManager::addClue() {
+		_currentLevel->addClue();
+		printf("ADDING CLUE\n");
+	}
+
+	Level* LevelManager::getCurrentLevel() {
+		return _currentLevel;
+	}
+
+	void LevelManager::addEntity(std::string id) {
+		_currentEntities->push_back(id);
+	}
+
+	std::list<std::string>* LevelManager::getCurrentEntities() {
+		return _currentEntities;
+	}
+}

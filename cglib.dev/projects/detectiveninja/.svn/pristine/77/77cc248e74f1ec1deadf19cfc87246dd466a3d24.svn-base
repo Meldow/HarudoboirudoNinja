@@ -1,0 +1,45 @@
+#ifndef OBJECT_SEXY_MAGAZINE_H
+#define OBJECT_SEXY_MAGAZINE_H
+
+#include <string>
+#include <math.h>
+#include "cg/cg.h"
+#include "WorldObject.h"
+#include "CollisionManager.h"
+#include "TextureManager.h"
+#include "LevelManager.h"
+
+#define SEXY_MAGAZINE_WIDTH		3.0f
+#define SEXY_MAGAZINE_LENGTH	5.0f
+#define SEXY_MAGAZINE_HEIGHT	0.3f
+
+namespace proj {
+
+	class ObjectSexyMagazine : public WorldObject
+	{
+	private:
+		bool _caught;
+
+	protected:
+		void registerToCollisionManager();
+		void createBoundingSpheres();
+		void updateBoundingSpheres();
+
+	public:
+		ObjectSexyMagazine(std::string id, cg::Vector3d position);
+		~ObjectSexyMagazine();
+
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+
+		bool wasCaught();
+		void wasThrown(cg::Vector3d position, cg::Vector3d front);
+
+		cg::Vector3d getPosition();
+		cg::Vector3d getFront();
+		void setHeight(int height);
+	};
+}
+
+#endif

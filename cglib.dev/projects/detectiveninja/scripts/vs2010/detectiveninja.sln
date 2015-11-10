@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "detectiveninja", "detectiveninja.vcxproj", "{4D0A7FDA-03FF-4360-A028-E159EA7F678A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cglib", "..\..\..\..\cglib\scripts\vs2010\cglib.vcxproj", "{8AED7839-6241-45CD-9ACE-651B8CC3B4D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D0A7FDA-03FF-4360-A028-E159EA7F678A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4D0A7FDA-03FF-4360-A028-E159EA7F678A}.Debug|Win32.Build.0 = Debug|Win32
+		{4D0A7FDA-03FF-4360-A028-E159EA7F678A}.Release|Win32.ActiveCfg = Release|Win32
+		{4D0A7FDA-03FF-4360-A028-E159EA7F678A}.Release|Win32.Build.0 = Release|Win32
+		{8AED7839-6241-45CD-9ACE-651B8CC3B4D4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8AED7839-6241-45CD-9ACE-651B8CC3B4D4}.Debug|Win32.Build.0 = Debug|Win32
+		{8AED7839-6241-45CD-9ACE-651B8CC3B4D4}.Release|Win32.ActiveCfg = Release|Win32
+		{8AED7839-6241-45CD-9ACE-651B8CC3B4D4}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

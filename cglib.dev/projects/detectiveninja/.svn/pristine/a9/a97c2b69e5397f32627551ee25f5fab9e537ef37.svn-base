@@ -1,0 +1,63 @@
+#include "CameraMode.h"
+
+namespace proj {
+
+	CameraMode::CameraMode(const std::string id) : Entity(id) {
+	}
+    CameraMode::~CameraMode() {
+	}
+    void CameraMode::init() {
+		cg::tWindowInfo win = cg::Manager::instance()->getApp()->getWindowInfo();
+		
+		_winSize.set(win.width,win.height);
+		_orientation.setRotationDeg(0,cg::Vector3d::ny);
+		
+		_up.set(0,0,1);
+		_front.set(1,0,0);
+		_right.set(0,1,0);
+		_position.set(0,0,0);
+
+		_isRoll = false;
+		
+	}
+    void CameraMode::draw() {
+    }
+
+	void CameraMode::onReshape(int width, int height) {
+		_winSize.set(width,height);
+	}
+
+	void CameraMode::onMouse(int button, int state, int x, int y) {
+	}
+
+	void CameraMode::onMouseMotion(int x, int y) {
+		if(_isRoll) {
+			double anglez = (_lastMousePosition[0] - x) / (double)5;
+				_q.setRotationDeg(anglez,_front);
+				_up = apply(_q,_up);
+				_right = apply(_q,_right);
+				
+				_orientation = _q * _orientation;
+		} else {
+				
+			double anglex = (_lastMousePosition[0] - x) / (double)5;
+				_q.setRotationDeg(anglex,_up);
+				_front = apply(_q,_front);
+				_right = apply(_q,_right);
+				_orientation = _q * _orientation;
+			double angley = (y - _lastMousePosition[1]) / (double)5;
+				_q.setRotationDeg(angley, _right);
+				//_up = apply(_q,_up);
+				_front = apply(_q,_front);
+				_orientation = _q * _orientation;
+				
+		}
+		_lastMousePosition.set(x,y);
+	}
+	void CameraMode::onMousePassiveMotion(int x, int y) {
+	}
+
+	void CameraMode::update(unsigned long elapsed_millis) {
+	}
+
+}

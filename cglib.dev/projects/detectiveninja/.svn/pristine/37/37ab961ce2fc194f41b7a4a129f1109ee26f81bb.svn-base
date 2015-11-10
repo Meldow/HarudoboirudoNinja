@@ -1,0 +1,6 @@
+Debug = p
+MoveForward = w
+MoveBackwards = s
+MoveLeft = a
+MoveRight = d
+TerrainToggler = o

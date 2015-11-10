@@ -1,0 +1,350 @@
+#include "Enemy.h"
+
+namespace proj {
+
+	Enemy::Enemy(std::string id, cg::Vector3d position) : WorldObject(id, position) {}
+	Enemy::~Enemy() {}
+
+	void Enemy::init() {
+
+		_physics.setPosition(_position[0], _position[1], _position[2]);
+		_physics.setLinearVelocity(25.0);
+		_physics.setAngularVelocity(100.0);
+		_physics.setAxesScale(12.0);
+
+		_isRunning = false;
+		_jumpKeyReleased = true;
+
+		_headWidth =  3.0f;
+		_headLength = 2.0f;
+		_headHeight = 4.0f;
+
+		_bodyWidth =  5.0f;
+		_bodyLength = 3.0f;
+		_bodyHeight = 4.0f;
+
+		_armWidth =  1.0f;
+		_armLength = 1.0f;
+		_armHeight = 3.0f;
+
+		_legWidth =  1.0f;
+		_legLength = 1.0f;
+		_legHeight = 3.0f;
+
+		_bodyAngle = 0.0f;
+
+		_armAngle[0] = 0.0f;
+		_armAngle[1] = 0.0f;
+		_armRotationVector[0].set(1,0,0);
+		_armRotationVector[1].set(1,0,0);
+
+		_legAngle[0] = 0.0f;
+		_legAngle[1] = 0.0f;
+		_legRotationVector[0].set(1,0,0);
+		_legRotationVector[1].set(1,0,0);
+
+		_legDirection[0] = true;
+		_legDirection[1] = false;
+
+		CollisionManager *collisionManager = (CollisionManager*)cg::Registry::instance()->get("CollisionManager");
+		collisionManager->registerEnemy(dynamic_cast<Collidable*>(cg::Registry::instance()->get(getId())));
+		createBoundingSpheres();
+		makeAlertDL();
+	}
+	
+	void Enemy::makeAlertDL() {
+		_alertDL = glGenLists(1);
+		assert(_alertDL != 0);
+		glNewList(_alertDL, GL_COMPILE);
+			glDisable(GL_LIGHTING);
+			glColor3f(1.0, 0.0, 0.0);
+			glTranslatef(0.0f, 0.0f, 12.0f);
+			glutSolidCube(1);
+			glTranslatef(0.0f, 0.0f, 3.0f);
+			glScalef(1.0f, 1.0f, 2.5f);
+			glutSolidCube(1);
+			glEnable(GL_LIGHTING);
+		glEndList();
+
+	}
+	void Enemy::update(unsigned long elapsed_millis) {
+
+		if (isColliding()) {
+			Scene* scene = dynamic_cast<Scene*>(cg::Registry::instance()->get("Scene"));
+			scene->onLose();
+		}
+
+		double elapsed_seconds = elapsed_millis / (double)1000;
+		_physics.step(elapsed_seconds);
+
+		updateBoundingSpheres();
+	}
+
+	void Enemy::draw() {
+
+		if (isDebug()) {
+			_physics.drawAxes();
+
+			glDisable(GL_LIGHTING);
+
+			for (int i = 0; i < getBoundingSpheres()->size(); i++) {
+
+				float* color = getBoundingSphere(i)->getColor();
+
+				glPushMatrix();
+					glColor3f(color[0], color[1], color[2]);
+					glTranslatef(getBoundingSphere(i)->getPosition()[0],
+						getBoundingSphere(i)->getPosition()[1],
+						getBoundingSphere(i)->getPosition()[2]);
+					glutWireSphere(getBoundingSphere(i)->getRadius(), 20, 20);
+				glPopMatrix();
+			}
+
+			glEnable(GL_LIGHTING);
+		}
+
+		updateAngles();
+
+		glPushMatrix();
+
+		// LOAD TEXTURES
+		TextureManager* tm = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+		GLuint txCrate = tm->get("crate")->getTextureDL();
+
+		glEnable(GL_TEXTURE_2D);
+
+		_physics.applyTransforms();
+		
+		// left leg
+		glPushMatrix();
+			if (_physics.isJumping()) {
+				glTranslatef(-(_legWidth + _bodyWidth) / 5.0f, 1.0f, _legHeight - 0.5f);
+			}
+			else {
+				glTranslatef(-(_legWidth + _bodyWidth) / 5.0f, 0.0f, _legHeight);
+			}
+			glRotatef(_legAngle[0], _legRotationVector[0][0], _legRotationVector[0][1], _legRotationVector[0][2]);
+			glTranslatef(0.0f, 0.0f, -_legHeight / 2.0f);
+			glScalef(_legWidth, _legLength, _legHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// right leg
+		glPushMatrix();
+			glTranslatef((_legWidth + _bodyWidth) / 5.0f, 0.0f, _legHeight);
+			glRotatef(_legAngle[1], _legRotationVector[1][0], _legRotationVector[1][1], _legRotationVector[1][2]);
+			glTranslatef(0.0f, 0.0f, -_legHeight / 2.0f);
+			glScalef(_legWidth, _legLength, _legHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// left arm
+		glPushMatrix();
+			if (_physics.isDoubleJumping()) {
+				glTranslatef(-_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight - 0.5);
+			}
+			else if (_physics.isJumping()) {
+				glTranslatef(-_bodyWidth / 2.0f, 1.0f, _armHeight + _legHeight - 1.0f);
+			}
+			else if (_isRunning) {
+				glTranslatef(-_bodyWidth / 2.0f, 1.5f, _armHeight + _legHeight - 1.0f);
+			}
+			else {
+				glTranslatef(-_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight);
+			}
+			glRotatef(_armAngle[0], _armRotationVector[0][0], _armRotationVector[0][1], _armRotationVector[0][2]);
+			glTranslatef(-_armWidth / 2.0f, 0.0f, -_armHeight / 2.0f);
+			glScalef(_armWidth, _armLength, _armHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// right arm
+		glPushMatrix();
+			if (_physics.isDoubleJumping()) {
+				glTranslatef(_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight - 0.5);
+			}
+			else if (_physics.isJumping()) {
+				glTranslatef(_bodyWidth / 2.0f, 2.0f, _armHeight + _legHeight - 1.0f);
+			}
+			else if (_isRunning) {
+				glTranslatef(_bodyWidth / 2.0f, 1.5f, _armHeight + _legHeight - 1.0f);
+			}
+			else {
+				glTranslatef(_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight);
+			}
+			glRotatef(_armAngle[1], _armRotationVector[1][0], _armRotationVector[1][1], _armRotationVector[1][2]);
+			glTranslatef(_armWidth / 2.0f, 0.0f, -_armHeight / 2.0f);
+			glScalef(_armWidth, _armLength, _armHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// body
+		glPushMatrix();
+			glTranslatef(0.0f, 0.0f, _legHeight - 0.5f);
+			glRotatef(_bodyAngle, 1.0f, 0.0f, 0.0f);
+			glTranslatef(0.0f, 0.0f, _bodyHeight / 2.0f);
+			glScalef(_bodyWidth, _bodyLength, _bodyHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		if (_bodyAngle < 0.0f) {
+			glTranslatef(0.0f, 2.5f, -0.75f);
+		}
+
+		// head
+		glPushMatrix();
+			glTranslatef(0.0f, 0.0f, _headHeight / 2.0f + _bodyHeight + _legHeight - 1.75f);
+			glScalef(_headWidth, _headLength, _headHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+	
+		if(dynamic_cast<Collidable*>(this)->isColliding()) {
+			glCallList(_alertDL);
+			
+		}
+		glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
+	}
+
+	void Enemy::registerToCollisionManager() {
+
+		createBoundingSpheres();
+
+		CollisionManager *collisionManager = (CollisionManager*)cg::Registry::instance()->get("CollisionManager");
+		collisionManager->registerNinja(dynamic_cast<Collidable*>(cg::Registry::instance()->get(getId())));
+	}
+
+	void Enemy::createBoundingSpheres() {
+
+		// main bounding sphere
+		double r = (_headHeight + _bodyHeight + _legHeight) / 2 - 0.7f;
+		cg::Vector3d p(getPosition()[0], getPosition()[1], getPosition()[2] + r);
+		BoundingSphere *b = new BoundingSphere(r, p);
+
+		addBoundingSphere(b);
+
+		// vision bounding spheres
+		double prevR = r;
+		r = _headHeight / 2 - 1.0f;
+
+		cg::Vector3d prevP;
+		p.set(getPosition()[0], getPosition()[1] + prevR + r, getPosition()[2] + _legHeight + _bodyHeight);
+
+		int maxNBoundingSpheres = 5;
+		for (int i = 0; i <= maxNBoundingSpheres; i++) {
+			
+			b = new BoundingSphere(r, p);
+			addBoundingSphere(b);
+
+			prevR = r; r += 1.0f;
+			prevP.set(p[0], p[1], p[2]); p.set(prevP[0], prevP[1] + prevR + r, prevP[2]); 
+		}
+	}
+
+	void Enemy::updateBoundingSpheres() {
+		// TODO
+	}
+
+	cg::Vector3d Enemy::getPosition() {
+		return _physics.getPosition();
+	}
+
+	void Enemy::setHeight(int height) {
+		_physics.setPosition(getPosition()[0], getPosition()[1], height);
+	}
+
+	void Enemy::updateAngles() {
+
+		float _legMaxAngle = 45.0f, _legAngleUpdate = 10.0f;
+		
+		if (_physics.isDoubleJumping()) {
+
+			_bodyAngle = 0.0f;
+
+			_armAngle[0] = 100.0f;
+			_armAngle[1] = -100.0f;
+			_armRotationVector[0].set(0,1,0);
+			_armRotationVector[1].set(0,1,0);
+
+			_legAngle[0] = 100.0f;
+			_legAngle[1] = -100.0f;
+			_legRotationVector[0].set(0,1,0);
+			_legRotationVector[1].set(0,1,0);
+
+			_legDirection[0] = true;
+			_legDirection[1] = false;
+		}
+		else if (_physics.isJumping()) {
+
+			_bodyAngle = -45.0f;
+
+			_armAngle[0] = -90.0f;
+			_armAngle[1] = 100.0f;
+			_armRotationVector[0].set(1,0,0);
+			_armRotationVector[1].set(1,0,0);
+
+			_legAngle[0] = 80.0f;
+			_legAngle[1] = -80.0f;
+			_legRotationVector[0].set(1,0,0);
+			_legRotationVector[1].set(1,0,0);
+
+			_legDirection[0] = true;
+			_legDirection[1] = false;
+		}
+		else if (_isRunning) {
+
+			_bodyAngle = -45.0f;
+
+			_armAngle[0] = _armAngle[1] = -80.0f;
+			_armRotationVector[0].set(1,0,0);
+			_armRotationVector[1].set(1,0,0);
+
+			if (_legDirection[0]) {
+				_legAngle[0] += _legAngleUpdate;
+			}
+			else {
+				_legAngle[0] -= _legAngleUpdate;
+			}
+
+			if (_legAngle[0] <= -_legMaxAngle) {
+				_legDirection[0] = true;
+			}
+			else if (_legAngle[0] >= _legMaxAngle) {
+				_legDirection[0] = false;
+			}
+
+			if (_legDirection[1]) {
+				_legAngle[1] += _legAngleUpdate;
+			}
+			else {
+				_legAngle[1] -= _legAngleUpdate;
+			}
+
+			if (_legAngle[1] <= -_legMaxAngle) {
+				_legDirection[1] = true;
+			}
+			else if (_legAngle[1] >= _legMaxAngle) {
+				_legDirection[1] = false;
+			}
+
+			_legRotationVector[0].set(1,0,0);
+			_legRotationVector[1].set(1,0,0);
+		}
+		else {	// stop moving
+
+			_bodyAngle = 0.0f;
+
+			_armAngle[0] = _armAngle[1] = 0.0f;
+			_armRotationVector[0].set(1,0,0);
+			_armRotationVector[1].set(1,0,0);
+
+			_legAngle[0] = _legAngle[1] = 0.0f;
+			_legRotationVector[0].set(1,0,0);
+			_legRotationVector[1].set(1,0,0);
+
+			_legDirection[0] = true;
+			_legDirection[1] = false;
+		}
+	}
+}

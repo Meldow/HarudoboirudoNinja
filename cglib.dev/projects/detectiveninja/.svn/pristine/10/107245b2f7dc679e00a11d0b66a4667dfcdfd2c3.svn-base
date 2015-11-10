@@ -1,0 +1,98 @@
+#include "MainCamera.h"
+
+namespace proj {
+
+	MainCamera::MainCamera() : CameraMode("MainCamera") {}
+    MainCamera::~MainCamera() {
+		_target = 0;
+	}
+    void MainCamera::init() {
+
+		CameraMode::init();
+		
+		_target = dynamic_cast<ITargetable*>(cg::Registry::instance()->get("Ninja"));
+		//dynamic_cast<Ninja*>(_target)->getFront();
+		printf("FRONT IS: %d, %d, %d\n", _front[0], _front[1], _front[2]);
+		printf("NINJA IS: %d, %d, %d\n", _target->getPosition()[0], _target->getPosition()[1], _target->getPosition()[2]);
+		_front.set(0,-1,MAX_CAM_HEIGHT);
+		_isRoll = false;
+
+		_scale = 25.0f;
+    }
+
+	void MainCamera::onReshape(int width, int height) {
+		CameraMode::onReshape(width, height);
+	}
+
+#if !defined(GLUT_WHEEL_UP)
+# define GLUT_WHEEL_UP 3
+# define GLUT_WHEEL_DOWN 4
+#endif
+	void MainCamera::onMouse(int button, int state, int x, int y) {
+		_isRoll = (button == GLUT_RIGHT_BUTTON);
+		_lastMousePosition.set(x,y);
+
+		if (state == GLUT_UP) {
+			if ( button == GLUT_WHEEL_DOWN ) {
+				_scale += 2.5f;
+			} else if( button == GLUT_WHEEL_UP ) {
+				if(_scale > 2.5f)
+					_scale -= 2.5f;
+			}
+		}
+	}
+	
+	void MainCamera::onMouseMotion(int x, int y) {
+		if(_isRoll) {
+			double anglez = (_lastMousePosition[0] - x) / (double)5;
+				_q.setRotationDeg(anglez,_front);
+				_up = apply(_q,_up);
+				_right = apply(_q,_right);
+				_orientation = _q * _orientation;
+				
+		} else {
+			double anglex = (_lastMousePosition[0] - x) / (double)5;
+				_q.setRotationDeg(anglex,_up);
+				_front = apply(_q,_front);
+				_right = apply(_q,_right);
+				_orientation = _q * _orientation;
+			double angley = (y - _lastMousePosition[1]) / (double)5;
+				//if(angley > 0 && (_position[2] < (_target->getPosition()[2] + 10.0))) {
+				//	//camera too low
+				//} else if (angley < 0 && _front[2] > MAX_CAM_HEIGHT  ) {
+				//	//camera incline too high
+				//} else{
+					
+					_q.setRotationDeg(angley, _right);
+					//_up = apply(_q,_up);
+					_front = apply(_q,_front);
+					_orientation = _q * _orientation;
+				//}
+
+		}
+		_lastMousePosition.set(x,y);
+	}
+
+	void MainCamera::onMousePassiveMotion(int x, int y) {
+		CameraMode::onMousePassiveMotion(x,y);
+	}
+	
+    void MainCamera::draw() {
+
+		_position = _front * _scale;
+		
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+		gluPerspective(	60.0, _winSize[0]/_winSize[1], 1.0, 10000.0);
+ 	
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+		
+	
+		gluLookAt(	_position[0] + _target->getPosition()[0], _position[1] + _target->getPosition()[1], _position[2],
+					_target->getPosition()[0], _target->getPosition()[1], _target->getPosition()[2],
+					_up[0], _up[1], _up[2]);
+    }
+
+	
+}

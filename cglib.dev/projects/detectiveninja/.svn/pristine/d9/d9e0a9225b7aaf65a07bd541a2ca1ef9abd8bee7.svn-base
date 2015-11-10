@@ -1,0 +1,364 @@
+#include "Ninja.h"
+
+namespace proj {
+
+	Ninja::Ninja(std::string id, cg::Vector3d position) : WorldObject(id, position) {}
+	Ninja::~Ninja() {}
+
+	void Ninja::init() {
+
+		_physics.setPosition(_position[0], _position[1], _position[2]);
+		_physics.setLinearVelocity(50.0);
+		_physics.setAngularVelocity(100.0);
+		_physics.setAxesScale(12.0);
+
+		_previousPosition = _position;
+
+		_isRunning = false;
+		_jumpKeyReleased = true;
+
+		_hatCenterWidth =  2.0f;
+		_hatCenterLength = 2.0f;
+		_hatCenterHeight = 1.5f;
+
+		_hatMiddleWidth =  4.0f;
+		_hatMiddleLength = 0.5f;
+		_hatMiddleHeight = 0.6f;
+
+		_headWidth =  6.0f;
+		_headLength = 3.0f;
+		_headHeight = 4.0f;
+
+		_bodyWidth =  3.0f;
+		_bodyLength = 2.0f;
+		_bodyHeight = 4.0f;
+
+		_armWidth =  1.0f;
+		_armLength = 1.0f;
+		_armHeight = 2.0f;
+
+		_legWidth =  1.0f;
+		_legLength = 1.0f;
+		_legHeight = 2.0f;
+
+		_bodyAngle = 0.0f;
+
+		_armAngle[0] = 0.0f;
+		_armAngle[1] = 0.0f;
+		_armRotationVector[0].set(1,0,0);
+		_armRotationVector[1].set(1,0,0);
+
+		_legAngle[0] = 0.0f;
+		_legAngle[1] = 0.0f;
+		_legRotationVector[0].set(1,0,0);
+		_legRotationVector[1].set(1,0,0);
+
+		_legDirection[0] = true;
+		_legDirection[1] = false;
+
+		registerToCollisionManager();
+	}
+	
+	void Ninja::update(unsigned long elapsed_millis) {
+
+		double elapsed_seconds = elapsed_millis / (double)1000;
+		_isRunning = false;
+
+		if(cg::KeyBuffer::instance()->isKeyDown('w')) {
+			_isRunning = true;
+			_physics.goAhead();
+		}
+		if(cg::KeyBuffer::instance()->isKeyDown('s')) {
+
+			_isRunning = true;
+			_physics.goBack();
+		}
+		if(cg::KeyBuffer::instance()->isKeyDown('a')) {
+			_physics.yawLeft();
+		}
+		if(cg::KeyBuffer::instance()->isKeyDown('d')) {
+			_physics.yawRight();
+		}
+		if(cg::KeyBuffer::instance()->isKeyDown(32)) {
+
+			if (!_physics.isJumping() && !_physics.isDoubleJumping() && _jumpKeyReleased) {
+				_jumpKeyReleased = false;
+				_physics.jump();
+			}
+			else if (_physics.isJumping() && !_physics.isDoubleJumping() && _jumpKeyReleased) {
+				_jumpKeyReleased = false;
+				_physics.doubleJump();
+			}
+		}
+		if(cg::KeyBuffer::instance()->isKeyUp(32)) {
+			_jumpKeyReleased = true;
+		}
+
+		_previousPosition = getPosition();
+		_physics.step(elapsed_seconds);
+
+		updateBoundingSpheres();
+	}
+
+	void Ninja::draw() {
+
+		if (isColliding()) {
+			_physics.setPosition(_previousPosition[0], _previousPosition[1], _previousPosition[2]);
+			// _physics.setMinHeight(_previousPosition[2]);
+		}
+
+		if (isDebug()) {
+			_physics.drawAxes();
+
+			float* color = getBoundingSphere(0)->getColor();
+			glPushMatrix();
+
+				glDisable(GL_LIGHTING);
+
+				glColor3f(color[0], color[1], color[2]);
+				glTranslatef(getBoundingSphere(0)->getPosition()[0], getBoundingSphere(0)->getPosition()[1], getBoundingSphere(0)->getPosition()[2]);
+				glutWireSphere(getBoundingSphere(0)->getRadius(), 20, 20);
+
+				glEnable(GL_LIGHTING);
+
+			glPopMatrix();
+		}
+
+		updateAngles();
+
+		glPushMatrix();
+
+		// LOAD TEXTURES
+		TextureManager* tm = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+		GLuint txCrate = tm->get("crate")->getTextureDL();
+		GLuint txNinjaFace = tm->get("ninja_face")->getTextureDL();
+
+		glEnable(GL_TEXTURE_2D);
+
+		_physics.applyTransforms();
+		
+		// left leg
+		glPushMatrix();
+			if (_physics.isJumping()) {
+				glTranslatef(-(_legWidth + _bodyWidth) / 5.0f, 1.0f, _legHeight - 0.5f);
+			}
+			else {
+				glTranslatef(-(_legWidth + _bodyWidth) / 5.0f, 0.0f, _legHeight);
+			}
+			glRotatef(_legAngle[0], _legRotationVector[0][0], _legRotationVector[0][1], _legRotationVector[0][2]);
+			glTranslatef(0.0f, 0.0f, -_legHeight / 2.0f);
+			glScalef(_legWidth, _legLength, _legHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// right leg
+		glPushMatrix();
+			glTranslatef((_legWidth + _bodyWidth) / 5.0f, 0.0f, _legHeight);
+			glRotatef(_legAngle[1], _legRotationVector[1][0], _legRotationVector[1][1], _legRotationVector[1][2]);
+			glTranslatef(0.0f, 0.0f, -_legHeight / 2.0f);
+			glScalef(_legWidth, _legLength, _legHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// left arm
+		glPushMatrix();
+			if (_physics.isDoubleJumping()) {
+				glTranslatef(-_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight - 0.5);
+			}
+			else if (_physics.isJumping()) {
+				glTranslatef(-_bodyWidth / 2.0f, 1.0f, _armHeight + _legHeight - 1.0f);
+			}
+			else if (_isRunning) {
+				glTranslatef(-_bodyWidth / 2.0f, 1.5f, _armHeight + _legHeight - 1.0f);
+			}
+			else {
+				glTranslatef(-_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight);
+			}
+			glRotatef(_armAngle[0], _armRotationVector[0][0], _armRotationVector[0][1], _armRotationVector[0][2]);
+			glTranslatef(-_armWidth / 2.0f, 0.0f, -_armHeight / 2.0f);
+			glScalef(_armWidth, _armLength, _armHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// right arm
+		glPushMatrix();
+			if (_physics.isDoubleJumping()) {
+				glTranslatef(_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight - 0.5);
+			}
+			else if (_physics.isJumping()) {
+				glTranslatef(_bodyWidth / 2.0f, 2.0f, _armHeight + _legHeight - 1.0f);
+			}
+			else if (_isRunning) {
+				glTranslatef(_bodyWidth / 2.0f, 1.5f, _armHeight + _legHeight - 1.0f);
+			}
+			else {
+				glTranslatef(_bodyWidth / 2.0f, 0.0f, _armHeight + _legHeight);
+			}
+			glRotatef(_armAngle[1], _armRotationVector[1][0], _armRotationVector[1][1], _armRotationVector[1][2]);
+			glTranslatef(_armWidth / 2.0f, 0.0f, -_armHeight / 2.0f);
+			glScalef(_armWidth, _armLength, _armHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		// body
+		glPushMatrix();
+			glTranslatef(0.0f, 0.0f, _legHeight - 0.5f);
+			glRotatef(_bodyAngle, 1.0f, 0.0f, 0.0f);
+			glTranslatef(0.0f, 0.0f, _bodyHeight / 2.0f);
+			glScalef(_bodyWidth, _bodyLength, _bodyHeight);
+			unitCube(txCrate);
+		glPopMatrix();
+
+		if (_bodyAngle < 0.0f) {
+			glTranslatef(0.0f, 2.5f, -0.75f);
+		}
+
+		// head
+		glPushMatrix();
+			glTranslatef(0.0f, 0.0f, _headHeight / 2.0f + _bodyHeight + _legHeight - 1.75f);
+			glScalef(_headWidth, _headLength, _headHeight);
+			unitCube(txNinjaFace, txCrate, txCrate, txCrate, txCrate, txCrate);
+		glPopMatrix();
+
+		// hat
+		glPushMatrix();
+		glTranslatef(0.0f, 0.0f, _hatCenterHeight / 2.0f + _headHeight + _bodyHeight + _legHeight - 1.75f);
+			glPushMatrix();
+				glScalef(_hatMiddleWidth, _hatMiddleLength, _hatMiddleHeight);
+				unitCube(txCrate, txCrate, txCrate, txCrate, txCrate, txCrate);
+			glPopMatrix();
+			glPushMatrix();
+				glScalef(_hatCenterWidth, _hatCenterLength, _hatCenterHeight);
+				unitCube(txCrate);
+			glPopMatrix();
+		glPopMatrix();
+
+		glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
+	}
+
+	void Ninja::registerToCollisionManager() {
+
+		createBoundingSpheres();
+
+		CollisionManager *collisionManager = (CollisionManager*)cg::Registry::instance()->get("CollisionManager");
+		collisionManager->registerNinja(dynamic_cast<Collidable*>(cg::Registry::instance()->get(getId())));
+	}
+
+	void Ninja::createBoundingSpheres() {
+
+		double radius = (_headHeight + _bodyHeight + _legHeight) / 2;
+		cg::Vector3d position(getPosition()[0], getPosition()[1], getPosition()[2] + radius);
+
+		BoundingSphere *mainBoundingSphere = new BoundingSphere(radius, position);
+		addBoundingSphere(mainBoundingSphere);
+	}
+
+	void Ninja::updateBoundingSpheres() {
+
+		getBoundingSphere(0)->updatePosition(
+			cg::Vector3d(getPosition()[0], getPosition()[1], getPosition()[2] + getBoundingSphere(0)->getRadius())); 
+	}
+
+	cg::Vector3d Ninja::getPosition() {
+		return _physics.getPosition();
+	}
+
+	void Ninja::setHeight(int height) {
+		_physics.setMinHeight(height);
+	}
+
+	void Ninja::updateAngles() {
+
+		float _legMaxAngle = 45.0f, _legAngleUpdate = 10.0f;
+		
+		if (_physics.isDoubleJumping()) {
+
+			_bodyAngle = 0.0f;
+
+			_armAngle[0] = 100.0f;
+			_armAngle[1] = -100.0f;
+			_armRotationVector[0].set(0,1,0);
+			_armRotationVector[1].set(0,1,0);
+
+			_legAngle[0] = 100.0f;
+			_legAngle[1] = -100.0f;
+			_legRotationVector[0].set(0,1,0);
+			_legRotationVector[1].set(0,1,0);
+
+			_legDirection[0] = true;
+			_legDirection[1] = false;
+		}
+		else if (_physics.isJumping()) {
+
+			_bodyAngle = -45.0f;
+
+			_armAngle[0] = -90.0f;
+			_armAngle[1] = 100.0f;
+			_armRotationVector[0].set(1,0,0);
+			_armRotationVector[1].set(1,0,0);
+
+			_legAngle[0] = 80.0f;
+			_legAngle[1] = -80.0f;
+			_legRotationVector[0].set(1,0,0);
+			_legRotationVector[1].set(1,0,0);
+
+			_legDirection[0] = true;
+			_legDirection[1] = false;
+		}
+		else if (_isRunning) {
+
+			_bodyAngle = -45.0f;
+
+			_armAngle[0] = _armAngle[1] = -80.0f;
+			_armRotationVector[0].set(1,0,0);
+			_armRotationVector[1].set(1,0,0);
+
+			if (_legDirection[0]) {
+				_legAngle[0] += _legAngleUpdate;
+			}
+			else {
+				_legAngle[0] -= _legAngleUpdate;
+			}
+
+			if (_legAngle[0] <= -_legMaxAngle) {
+				_legDirection[0] = true;
+			}
+			else if (_legAngle[0] >= _legMaxAngle) {
+				_legDirection[0] = false;
+			}
+
+			if (_legDirection[1]) {
+				_legAngle[1] += _legAngleUpdate;
+			}
+			else {
+				_legAngle[1] -= _legAngleUpdate;
+			}
+
+			if (_legAngle[1] <= -_legMaxAngle) {
+				_legDirection[1] = true;
+			}
+			else if (_legAngle[1] >= _legMaxAngle) {
+				_legDirection[1] = false;
+			}
+
+			_legRotationVector[0].set(1,0,0);
+			_legRotationVector[1].set(1,0,0);
+		}
+		else {	// stop moving
+
+			_bodyAngle = 0.0f;
+
+			_armAngle[0] = _armAngle[1] = 0.0f;
+			_armRotationVector[0].set(1,0,0);
+			_armRotationVector[1].set(1,0,0);
+
+			_legAngle[0] = _legAngle[1] = 0.0f;
+			_legRotationVector[0].set(1,0,0);
+			_legRotationVector[1].set(1,0,0);
+
+			_legDirection[0] = true;
+			_legDirection[1] = false;
+		}
+	}
+}

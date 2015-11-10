@@ -1,0 +1,36 @@
+#include "BoxRed.h"
+
+//TODO alterar para 3D
+namespace proj {
+
+	BoxRed::BoxRed(std::string id, cg::Vector3d position) : cg::Entity(id) {
+		_position = position;
+	}
+	BoxRed::~BoxRed() {
+	}
+
+	void BoxRed::init() {
+		printf("BoxRed :: INIT \n");
+	}
+
+	void BoxRed::update(unsigned long elapsed_millis) {
+		double elapsed_seconds = elapsed_millis / (double)1000; //tempo (time = Time.deltaTime), numero de segundos q passou do ultimo frame
+	}
+
+	void BoxRed::draw() {
+		//printf("BoxRed:: Drawing BoxRed\n");
+		glPushMatrix();
+			//LOG("Debug", "REDCUBE:Pos " + std::string(_position[0]));
+			//printf("REDCUBE::Pos %f %f %f\n", _position[0], _position[1], _position[2]);
+		glTranslatef(_position[0], _position[1], _position[2]);
+			glColor3f(1.0f,0.0f,0.0f);
+			glutSolidCube(100.0);
+		glPopMatrix();
+	}
+
+	cg::Vector3d BoxRed::getPosition(){
+		return _position;
+	}
+	
+	
+}

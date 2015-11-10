@@ -1,0 +1,48 @@
+#include "MainApp.h"
+
+namespace proj {
+
+	MainApp::MainApp() {
+
+		_windowInfo.caption = "Hardboiled Ninja";
+		_windowInfo.width = 1024;
+		_windowInfo.height = 768;
+		_windowInfo.x = 0;
+		_windowInfo.y = 0;
+	}
+
+	MainApp::~MainApp() {}
+	
+	void MainApp::createEntities() {
+		
+		float light0position[] =	{ 0.0, 0.0, 0.0, 1.0 };
+		float light0direction[] = { 0.0, 0.0, -1.0 };
+
+		addEntity(new Scene());
+		addEntity(new Camera());
+		addEntity(new MainCamera());
+		addEntity(new FreeCamera());
+		addEntity(new DirectionalLight("DirectionalLight"));
+		addEntity(new PositionalLight("PositionalLight0", GL_LIGHT1, light0position, light0direction));
+		addEntity(new HeightMapLoader("mappedterrain", cg::Vector3d(0,0,-1024)));
+		addEntity(new ItemMapLoader("mappeditems"));
+		addEntity(new Ninja("Ninja", cg::Vector3d(512,512,0)));
+		//addEntity(new Enemy("Enemy1", cg::Vector3d(552,552,0)));
+		addEntity(new Controller());
+		addEntity(new Grid("grid1"));
+	}
+
+	void MainApp::createViews() {
+		
+		cg::View* v = createView("view1");
+		v->setViewport(0.0f,0.0f,1.0f,1.0f);
+		//v->linkEntityAtEnd("Scene");
+		v->linkEntityAtEnd("Camera");
+		v->linkEntityAtEnd("DirectionalLight");
+		v->linkEntityAtEnd("PositionalLight0");
+		v->linkEntityAtEnd("mappedterrain");
+		v->linkEntityAtEnd("grid1");
+		v->linkEntityAtEnd("Ninja");
+		//v->linkEntityAtEnd("Enemy1");
+	}
+}

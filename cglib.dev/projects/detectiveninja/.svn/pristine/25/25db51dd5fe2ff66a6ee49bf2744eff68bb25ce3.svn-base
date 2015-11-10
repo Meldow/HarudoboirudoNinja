@@ -1,0 +1,36 @@
+#ifndef LEVEL_H
+#define LEVEL_H
+
+#include <list>
+#include "Material.h"
+#include "Texture.h"
+
+namespace proj {
+
+	class Level 
+	{
+	protected:
+		int _levelNumber;
+		std::string _heightmap;
+		std::string _itemmap;
+		std::list<Texture*>* _levelTexs;
+		std::list<Material*>* _levelMats;
+		int _totalClues;
+		std::string _lvlName;
+	public:
+		Level(int nr, std::string name, std::string heightmap, std::string itemmap);
+		~Level();
+		virtual void init();
+		void addClue();
+
+		int getTotalClues();
+		std::list<Texture*>* getTextures();
+		std::list<Material*>* getMaterials();
+		std::string getHeightMap();
+		std::string getItemMap();
+		void resetLevel();
+	};
+}
+
+
+#endif

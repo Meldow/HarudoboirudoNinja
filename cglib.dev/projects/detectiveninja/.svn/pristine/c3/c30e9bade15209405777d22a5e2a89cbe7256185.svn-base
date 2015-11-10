@@ -1,0 +1,58 @@
+#include "Controller.h"
+
+namespace proj {
+
+	Controller::Controller() : cg::Entity("Controller") {}
+	Controller::~Controller() {}
+	void Controller::init() {}
+
+	void Controller::onKeyPressed(unsigned char key) {}
+	void Controller::onKeyReleased(unsigned char key) {
+		
+		if (key == '1') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->toggleMapDebugMode();
+			}
+		}
+		if (key == '2') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->togglePlayerDebugMode();
+			}
+		}
+		if (key == '3') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->toggleEnemyDebugMode();
+			}
+		}
+		if (key == '4') {
+			DebugManager* debugManager = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			if(debugManager->isDebugModeActive()) {
+				debugManager->toggleStaticObjectDebugMode();
+			}
+		}
+	}
+
+	void Controller::onSpecialKeyReleased(int key) {
+
+        if (key == GLUT_KEY_F1) {
+			cg::Manager::instance()->getApp()->dump();
+        }
+		if(key == GLUT_KEY_F2) { 
+			DebugManager* dm = dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+			dm->toggleDebugMode();
+		}
+		if(key == GLUT_KEY_F3) {
+			Camera* camera = dynamic_cast<Camera*>( cg::Registry::instance()->get("Camera"));
+			camera->mainCamera();
+		}
+		if(key == GLUT_KEY_F4) {
+			if(static_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"))->isDebugModeActive()) {
+				Camera* camera = dynamic_cast<Camera*>( cg::Registry::instance()->get("Camera"));
+				camera->freeCamera();
+			}
+		}
+	}
+}

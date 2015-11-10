@@ -1,0 +1,46 @@
+#ifndef FREE_CAMERA_H
+#define FREE_CAMERA_H
+
+#include <string>
+#include "cg/cg.h"
+#include "RandomCube.h"
+#include "MyPhysics.h"
+
+namespace proj {
+
+    class FreeCamera : public cg::Entity, 
+		public cg::IDrawListener,
+		public cg::IReshapeEventListener,
+		public cg::IMouseEventListener,
+		public cg::IUpdateListener
+
+	{
+    private:
+		MyPhysics _physics;
+		cg::Vector2d _winSize;
+		cg::Vector3d _position, _lookAt;
+		cg::Vector3d _up,_front,_right;
+		cg::Quaterniond _orientation, _q;
+		cg::Vector2d _lastMousePosition;
+
+		RandomCube* _lookCube;
+		float _scale;
+		bool _isRoll;
+		bool _isMoving;
+		double CAM_SPEED;
+
+
+    public:
+        FreeCamera(const std::string id);
+        virtual ~FreeCamera();
+        void init();
+        void draw();
+        void onReshape(int width, int height);
+        void onMouse(int button, int state, int x, int y);
+        void onMouseMotion(int x, int y);
+        void onMousePassiveMotion(int x, int y);
+		void update(unsigned long elapsed_millis);
+	};
+}
+
+#endif

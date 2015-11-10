@@ -1,0 +1,32 @@
+#ifndef COLLISION_MANAGER_H
+#define COLLISION_MANAGER_H
+
+#include "cg/cg.h"
+#include "Collidable.h"
+
+namespace proj {
+
+	class CollisionManager : public cg::Entity,
+		public cg::IUpdateListener
+	{
+	private:
+		Collidable* _ninja;		// use a list to support multiplayer
+		std::vector<Collidable*>* _enemies;
+		std::vector<Collidable*>* _staticObjects;
+
+		bool boundingSphereCollisionTest(Collidable* collidableObj1, Collidable* collidableObj2);
+
+	public:
+		CollisionManager();
+		~CollisionManager();
+
+		void registerNinja(Collidable* ninja);
+		void registerEnemy(Collidable* enemy);
+		void registerStaticObject(Collidable* staticObject);
+
+		void init();
+		void update(unsigned long elapsed_millis);
+	};
+}
+
+#endif

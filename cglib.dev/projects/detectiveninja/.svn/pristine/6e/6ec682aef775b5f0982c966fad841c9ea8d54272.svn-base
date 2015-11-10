@@ -1,0 +1,108 @@
+#include "Skybox.h"
+
+namespace proj {
+
+	Skybox::Skybox() : cg::Entity("Skybox") {}
+	Skybox::~Skybox() {}
+
+	void Skybox::init() {
+	
+		_x		= 0.0f;
+		_y		= 0.0f;
+		_z		= 0.0f;
+		_width	= 500.0f;
+		_height	= 500.0f;
+		_length	= 500.0f;
+	}
+
+	void Skybox::draw() {
+	
+		float x = _x - _width / 2;
+		float y = _y - _height / 2;
+		float z = _z - _length / 2;
+
+		TextureManager* textureManager = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+		// GLuint txCrate = textureManager->get("crate")->getTextureDL();
+		
+		glPushMatrix();
+		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
+		
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		/**
+		 * BACK
+		 */
+		GLuint texBack = textureManager->get("tex_skybox_back")->getTextureDL();
+		glBindTexture(GL_TEXTURE_2D, texBack);
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(x + _width, y,			  z);
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(x + _width, y + _height, z); 
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(x,			 y + _height, z);
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(x,			 y,			  z);
+		glEnd();
+
+		/**
+		 * FRONT
+		 */
+		GLuint texFront = textureManager->get("tex_skybox_front")->getTextureDL();
+		glBindTexture(GL_TEXTURE_2D, texFront);
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(x,			 y,			  z + _length);
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(x,			 y + _height, z + _length);
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(x + _width, y + _height, z + _length); 
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(x + _width, y,			  z + _length);
+		glEnd();
+
+		/**
+		 * TOP
+		 */
+		GLuint texTop = textureManager->get("tex_skybox_top")->getTextureDL();
+		glBindTexture(GL_TEXTURE_2D, texTop);
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(x + _width, y + _height, z);
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(x + _width, y + _height, z + _length); 
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(x,			 y + _height, z + _length);
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(x,			 y + _height, z);
+		glEnd();
+
+		/**
+		 * LEFT
+		 */
+		GLuint texLeft = textureManager->get("tex_skybox_left")->getTextureDL();
+		glBindTexture(GL_TEXTURE_2D, texLeft);
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(x,	y + _height, z);	
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(x,	y + _height, z + _length); 
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(x,	y,			 z + _length);
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(x,	y,			 z);		
+		glEnd();
+
+		/**
+		 * RIGHT
+		 */
+		GLuint texRight = textureManager->get("tex_skybox_right")->getTextureDL();
+		glBindTexture(GL_TEXTURE_2D, texRight);
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(x + _width, y,			  z);
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(x + _width, y,			  z + _length);
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(x + _width, y + _height, z + _length); 
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(x + _width, y + _height, z);
+		glEnd();
+
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_LIGHTING);
+		glPopMatrix();
+	}
+}

@@ -1,0 +1,194 @@
+#include "CollisionManager.h"
+
+namespace proj {
+
+	CollisionManager::CollisionManager() : cg::Entity("CollisionManager") {}
+	CollisionManager::~CollisionManager() {}
+
+	void CollisionManager::init() {
+		_enemies = new std::vector<Collidable*>();
+		_clues = new std::vector<Collidable*>();
+		_staticObjects = new std::vector<Collidable*>();
+
+		_map = (ImageLoaderHeightMap*)cg::Registry::instance()->get("mappedterrain");
+	}
+
+	void CollisionManager::update(unsigned long elapsed_millis) {
+
+		bool isColliding = heightMapCollisionDetection(_ninja);
+		if (isColliding) {
+			return;
+		}
+
+		// TODO: DON'T ASSUME NINJAS AND STATIC OBJECTS ONLY HAVE ONE BOUNDING BOX
+		BoundingSphere* ninjaBoundingSphere = _ninja->getBoundingSphere(0);
+
+		// ENEMY/STATIC OBJECT >> ENEMY/NINJA
+		isColliding = false;
+		for (int enemyIdx = 0; enemyIdx < _enemies->size(); enemyIdx++) {
+			for (int enemyBSIdx = 0; enemyBSIdx < _enemies->at(enemyIdx)->getBoundingSpheres()->size(); enemyBSIdx++) {
+				
+				if (isColliding) {
+					_enemies->at(enemyIdx)->getBoundingSphere(enemyBSIdx)->isColliding(false);
+				}
+				else {
+					for (int staticObjIdx = 0; staticObjIdx < _staticObjects->size(); staticObjIdx++) {
+
+						BoundingSphere* staticObjectBS = _staticObjects->at(staticObjIdx)->getBoundingSphere(0);
+
+						isColliding = boundingSphereCollisionDetection(staticObjectBS, _enemies->at(enemyIdx)->getBoundingSphere(enemyBSIdx));
+					
+						// DEBUG
+						staticObjectBS->isColliding(isColliding);	
+					}
+
+					if (!isColliding){
+
+						BoundingSphere* ninjaBS = _ninja->getBoundingSphere(0);
+						isColliding = boundingSphereCollisionDetection(ninjaBS, _enemies->at(enemyIdx)->getBoundingSphere(enemyBSIdx));
+
+						// DEBUG
+						ninjaBS->isColliding(isColliding);
+
+						if (isColliding) {
+
+							Scene *scene = (Scene*)cg::Registry::instance()->get("Scene");
+							scene->onLose();
+
+							if (enemyBSIdx == 0) {
+								_ninja->isColliding(isColliding);
+
+								// Notify the enemy
+								_enemies->at(enemyIdx)->isColliding(isColliding);
+								_enemies->at(enemyIdx)->getBoundingSphere(enemyBSIdx)->isColliding(isColliding);
+
+								return;
+							}
+						}
+					}
+
+					// Notify the enemy
+					_enemies->at(enemyIdx)->isColliding(isColliding);
+					_enemies->at(enemyIdx)->getBoundingSphere(enemyBSIdx)->isColliding(isColliding);
+				}
+			}
+		}
+
+		// NINJA/CLUE
+		isColliding = false;
+		for (int clueIdx = 0; clueIdx < _clues->size(); clueIdx++) {
+
+			isColliding = boundingSphereCollisionDetection(ninjaBoundingSphere, _clues->at(clueIdx)->getBoundingSphere(0));
+
+			_clues->at(clueIdx)->isColliding(isColliding);
+			_clues->at(clueIdx)->getBoundingSphere(0)->isColliding(isColliding);
+
+			ninjaBoundingSphere->isColliding(isColliding);
+
+			if (isColliding) {
+				return;
+			}
+		}
+
+		
+		// STATIC OBJECT/NINJA
+		for (int staticObjIdx = 0; staticObjIdx < _staticObjects->size(); staticObjIdx++) {
+
+			BoundingSphere* ninjaBS = _ninja->getBoundingSphere(0);
+
+			isColliding = boundingSphereCollisionDetection(ninjaBS, _staticObjects->at(staticObjIdx)->getBoundingSphere(0));
+							
+			_ninja->isColliding(isColliding);
+			ninjaBS->isColliding(isColliding);
+
+			_staticObjects->at(staticObjIdx)->getBoundingSphere(0)->isColliding(isColliding);
+
+			if (isColliding) {
+				return;
+			}
+		}
+	}
+
+	void CollisionManager::registerNinja(Collidable* ninja) {
+		_ninja = ninja;
+	}
+	void CollisionManager::registerEnemy(Collidable* enemy) {
+		_enemies->push_back(enemy);
+	}
+	void CollisionManager::registerClue(Collidable* clue) {
+		_clues->push_back(clue);
+	}
+	void CollisionManager::registerStaticObject(Collidable* staticObject) {
+		_staticObjects->push_back(staticObject);
+	}
+
+	bool CollisionManager::heightMapCollisionDetection(Collidable* dynamicObject) {
+
+		bool isColliding = false;
+
+		//Ninja reference (buggy in header)
+		Ninja* _refNinja = dynamic_cast<Ninja*> (cg::Registry::instance()->get("Ninja"));
+		cg::Vector3d pos = dynamicObject->getPosition();
+		cg::Vector3d _ninjaPosition = _refNinja->getPosition();
+		cg::Vector3d _ninjaDirection = _refNinja->getFront();
+		
+		//debug to check my current position and my next one if i step forward
+		//std::cout << _map->Height(	_ninjaPosition[0] + _ninjaDirection[0]*_ninja->getBoundingSphere(0)->getRadius(),
+		//							_ninjaPosition[1] + _ninjaDirection[1]*_ninja->getBoundingSphere(0)->getRadius() 
+		//							)
+		//							<< "\n";
+
+		//if my height and my forward OR back height is bigger then 10 units, i cannot move forward!
+		if ( (_map->Height(	_ninjaPosition[0] + _ninjaDirection[0]*_ninja->getBoundingSphere(0)->getRadius()*2, _ninjaPosition[1] + _ninjaDirection[1]*_ninja->getBoundingSphere(0)->getRadius()*2) 
+			 > _ninjaPosition[2] + _ninjaDirection[2]*_ninja->getBoundingSphere(0)->getRadius()*2+10) 
+			 ||
+			 _map->Height(	_ninjaPosition[0] - _ninjaDirection[0]*_ninja->getBoundingSphere(0)->getRadius()*2, _ninjaPosition[1] - _ninjaDirection[1]*_ninja->getBoundingSphere(0)->getRadius()*2) 
+			 > _ninjaPosition[2] + _ninjaDirection[2]*_ninja->getBoundingSphere(0)->getRadius()*2+10
+			 ) {
+
+			_ninja->isColliding(true);
+			_ninja->getBoundingSphere(0)->isColliding(true);
+
+			isColliding = true;
+		}
+
+		else {
+			_ninja->isColliding(false);
+			_ninja->getBoundingSphere(0)->isColliding(false);
+
+			isColliding = false;
+		}
+			
+		if (!_ninja->isColliding()) {
+
+			int roundPosX = (int) pos[0];
+			int roundPosY = (int) pos[1];
+
+			float fracPosX = pos[0] - roundPosX;
+			float fracPosY = pos[1] - roundPosY;
+
+			float avgHeight = _map->Height(roundPosX, roundPosY) * (1.0f - fracPosX) * (1.0f - fracPosY)
+								+ _map->Height(roundPosX + 1, roundPosY) * fracPosX * (1.0f - fracPosY)
+								+ _map->Height(roundPosX, roundPosY + 1) * (1.0f - fracPosX) * fracPosY
+								+ _map->Height(roundPosX + 1, roundPosY + 1) * fracPosX * fracPosY;
+
+			dynamicObject->setHeight(avgHeight);
+		}
+
+		return isColliding;
+	}
+
+	bool CollisionManager::boundingSphereCollisionDetection(BoundingSphere* boundingSphere1, BoundingSphere* boundingSphere2) {
+		
+		cg::Vector3d v = boundingSphere1->getPosition() - boundingSphere2->getPosition();
+		double minDistance = boundingSphere1->getRadius() + boundingSphere2->getRadius();
+		double d = v[0] * v[0] + v[1] * v[1] + v[2] * v[2] - minDistance * minDistance;
+
+		if (d < 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+}

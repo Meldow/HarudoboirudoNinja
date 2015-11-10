@@ -1,0 +1,13 @@
+1 < Range < 254
+
+Red
+Input: 100; reads 78; 69%
+
+Pink
+Input: 120; reads 97; 62%
+
+Green
+Input: 140; reads 118; 54%
+
+Blue
+Input: 155; reads 134; 47%

@@ -1,0 +1,200 @@
+// This file is an example for CGLib.
+//
+// CGLib is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// CGLib is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with CGLib; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+// Copyright 2012 Carlos Martinho
+
+#include "Physics.h"
+
+namespace proj {
+
+	Physics::Physics() {
+		_axesScale = 1.0;
+		_position.set(0,0,0);
+		_orientation.setRotationDeg(0,cg::Vector3d(0,1,0));
+		_orientation.getGLMatrix(_rotationMatrix);
+		_front.set(0,1,0);
+		_up.set(0,0,1);
+		_right.set(1,0,0);
+		_linearVelocity = 0;
+		_upLinearVelocity = 0;
+		_angularVelocity = 0;
+		_isGoAhead = false;
+		_isGoBack = false;
+		_isYawLeft = false;
+		_isYawRight = false;
+		_isPitchUp = false;
+		_isPitchDown = false;
+		_isRollLeft = false;
+		_isRollRight = false;
+
+		_isJumping = false;
+		_isDoubleJumping = false;
+		_jumpBoost = false;
+		_gravity = 5;
+		_minHeight = 0;
+	}
+	Physics::~Physics() {
+	}
+	cg::Vector3d Physics::getPosition() {	return _position; }
+	cg::Quaterniond Physics::getOrientation() { return _orientation; }
+	cg::Vector3d Physics::getFront() { return _front; }
+	cg::Vector3d Physics::getUp() { return _up; }
+	cg::Vector3d Physics::getRight() { return _right; }
+
+	void Physics::setMinHeight(int minHeight) { _minHeight = minHeight; }
+
+	void Physics::setPosition(double x, double y, double z) {
+		_position.set(x,y,z);
+	}
+	void Physics::setLinearVelocity(double value) {
+		_linearVelocity = value;
+		_upLinearVelocity = value;
+	}
+	void Physics::setAngularVelocity(double value) {
+		_angularVelocity = value;
+	}
+	void Physics::goAhead() { _isGoAhead = true; }
+	void Physics::goBack() { _isGoBack = true; }
+	void Physics::yawLeft() { _isYawLeft = true; }
+	void Physics::yawRight() { _isYawRight = true; }
+	void Physics::pitchUp() { _isPitchUp = true; }
+	void Physics::pitchDown() { _isPitchDown = true; }
+	void Physics::rollLeft() { _isRollLeft = true; }
+	void Physics::rollRight() { _isRollRight = true; }
+
+	void Physics::jump() {
+		_isJumping = _jumpBoost = true;
+	}
+	void Physics::doubleJump() {
+		_isJumping = false;
+		_isDoubleJumping = _jumpBoost = true;
+	}
+
+	bool Physics::isJumping() {
+		return _isJumping;
+	}
+
+	bool Physics::isDoubleJumping() {
+		return _isDoubleJumping;
+	}
+
+	inline
+	void Physics::rotate(double elapsed_seconds, int direction, 
+						   cg::Vector3d axis, cg::Vector3d& v1, cg::Vector3d& v2) 
+	{
+		_q.setRotationDeg(direction * _angularVelocity * elapsed_seconds,axis);
+		v1 = apply(_q,v1);
+		v2 = apply(_q,v2);
+		_orientation = _q * _orientation;
+	}
+	void Physics::step(double elapsed_seconds) {
+		if(_isGoAhead) {
+			_position += _front * _linearVelocity * elapsed_seconds;
+			_isGoAhead = false;
+		}
+		if(_isGoBack) {
+			_position -= _front * _linearVelocity * elapsed_seconds;
+			_isGoBack = false;
+		}
+		if(_isYawLeft) {
+			rotate(elapsed_seconds,1,_up,_front,_right);
+			_isYawLeft = false;
+		}
+		if(_isYawRight) {
+			rotate(elapsed_seconds,-1,_up,_front,_right);
+			_isYawRight = false;
+		}
+		if(_isPitchUp) {
+			rotate(elapsed_seconds,1,_right,_up,_front);
+			_isPitchUp = false;
+		}
+		if(_isPitchDown) {
+			rotate(elapsed_seconds,-1,_right,_up,_front);
+			_isPitchDown = false;
+		}
+		if(_isRollLeft) {
+			rotate(elapsed_seconds,1,_front,_right,_up);
+			_isRollLeft = false;
+		}
+		if(_isRollRight) {
+			rotate(elapsed_seconds,-1,_front,_right,_up);
+			_isRollRight = false;
+		}
+
+		if(_isJumping || _isDoubleJumping) {
+
+			if (_jumpBoost) {
+				_upLinearVelocity = _linearVelocity;
+				_jumpBoost = false;
+			}
+			else {
+				_upLinearVelocity -= _gravity;
+			}
+
+			_position += _up * _upLinearVelocity * elapsed_seconds;
+
+			if (_position[2] <= _minHeight) {
+				_position[2] = _minHeight;
+				_upLinearVelocity = 0.0;
+				_isJumping = _isDoubleJumping = false;
+			}
+		}
+		else {
+			_upLinearVelocity -= _gravity;
+			_position += _up * _upLinearVelocity * elapsed_seconds;
+
+			if (_position[2] <= _minHeight) {
+				_position[2] = _minHeight;
+				_upLinearVelocity = 0.0;
+			}
+		}
+
+		_orientation.getGLMatrix(_rotationMatrix);
+	}
+	void Physics::applyTransforms() {
+        glTranslated(_position[0],_position[1],_position[2]);
+		glMultMatrixd(_rotationMatrix);
+	}
+	void Physics::setAxesScale(double scale) {
+		_axesScale = scale;
+	}
+	void Physics::drawAxes() {
+
+		glDisable(GL_LIGHTING);
+
+		glPushMatrix();
+			glTranslated(_position[0],_position[1],_position[2]);
+			glScaled(_axesScale,_axesScale,_axesScale);
+			glColor3f(1.0f,0.0f,0.0f);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(_front[0],_front[1],_front[2]);
+			glEnd();
+			glColor3f(0.0f,1.0f,0.0f);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(_right[0],_right[1],_right[2]);
+			glEnd();
+			glColor3f(0.0f,0.0f,1.0f);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(_up[0],_up[1],_up[2]);
+			glEnd();
+		glPopMatrix();
+
+		glEnable(GL_LIGHTING);
+	}
+}

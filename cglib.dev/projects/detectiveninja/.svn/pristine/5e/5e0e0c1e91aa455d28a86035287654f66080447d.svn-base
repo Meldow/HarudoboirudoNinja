@@ -1,0 +1,32 @@
+#ifndef MAIN_CAMERA_H
+#define MAIN_CAMERA_H
+
+#include <string>
+#include "cg/cg.h"
+#include "ITargetable.h"
+#include "CameraMode.h"
+
+namespace proj {
+
+    class MainCamera : public CameraMode
+	{
+    private:
+		
+		ITargetable* _target;
+		float _scale;
+
+    public:
+		MainCamera();
+        virtual ~MainCamera();
+        void init();							//init values of the camera
+        void draw();							//draw the camera
+        void onReshape(int width, int height);	//reshapes if needed
+		void onMouse(int button, int state, int x, int y);
+        void onMouseMotion(int x, int y);
+        void onMousePassiveMotion(int x, int y);
+		
+
+	};
+}
+
+#endif

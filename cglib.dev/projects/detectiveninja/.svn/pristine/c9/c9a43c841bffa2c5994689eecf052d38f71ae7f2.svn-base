@@ -1,0 +1,16 @@
+#ifndef ITARGETABLE_H
+#define ITARGETABLE_H
+
+#include "cg/cg.h"
+
+namespace proj {
+
+	class ITargetable 
+	{
+	public:
+		virtual cg::Vector3d getPosition() = 0;
+		virtual void toggleDebug() = 0;
+	};
+}
+
+#endif

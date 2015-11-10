@@ -1,0 +1,44 @@
+#ifndef COLLISION_MANAGER_H
+#define COLLISION_MANAGER_H
+
+#include <math.h>
+#include "cg/cg.h"
+#include "Collidable.h"
+#include "ImageLoaderHeightMap.h"
+#include "Scene.h"
+
+namespace proj {
+
+	class CollisionManager : public cg::Entity,
+		public cg::IUpdateListener
+	{
+	private:
+		Collidable* _ninja;
+		std::vector<Collidable*>* _enemies;
+		std::vector<Collidable*>* _clues;
+		std::vector<Collidable*>* _staticObjects;
+
+		ImageLoaderHeightMap *_map;
+
+		void heightMapCollisionDetection(Collidable* dynamicObject);
+		bool enemyCollisionDetection(Collidable* enemy, Collidable* object);
+		bool clueCollisionDetection(Collidable* clue);
+		bool staticObjectCollisionDetection(Collidable* dynamicObject, Collidable* staticObject);
+		
+		bool boundingSphereCollisionDetection(BoundingSphere* boundingSphere1, BoundingSphere* boundingSphere2);
+
+	public:
+		CollisionManager();
+		~CollisionManager();
+
+		void init();
+		void update(unsigned long elapsed_millis);
+
+		void registerNinja(Collidable* ninja);
+		void registerEnemy(Collidable* enemy);
+		void registerClue(Collidable* clue);
+		void registerStaticObject(Collidable* staticObject);
+	};
+}
+
+#endif

@@ -1,0 +1,23 @@
+#ifndef EXIT_TO_DESKTOP_COMMAND_H
+#define EXIT_TO_DESKTOP_COMMAND_H
+
+#include "Command.h"
+#include "cg/cg.h"
+
+namespace proj {
+
+    class ExitToDesktopCommand :  
+		public Command
+	{
+	private:
+		std::string _title;
+		GLfloat _Xsize;
+		GLfloat _Ysize;
+    public:
+        ExitToDesktopCommand();
+        ~ExitToDesktopCommand();
+		void execute();
+	};
+}
+
+#endif

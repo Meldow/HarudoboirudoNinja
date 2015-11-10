@@ -1,0 +1,200 @@
+//DAM this will be troublesome..
+//Height in y and should be in Z.
+//rotate at the end?
+
+#include "HeightMapLoader.h"
+
+namespace proj {
+	
+	HeightMapLoader::HeightMapLoader(std::string id) : cg::Entity(id) {}
+	HeightMapLoader::~HeightMapLoader() {}
+
+	void HeightMapLoader::init() {
+		hDC=NULL;									// Private GDI Device Context
+		hRC=NULL;									// Permanent Rendering Context
+		hWnd=NULL;									// Holds Our Window Handle
+		keys[256];									// Array Used For The Keyboard Routine
+		active=TRUE;								// Window Active Flag Set To TRUE By Default
+		fullscreen=TRUE;							// Fullscreen Flag Set To TRUE By Default
+		bRender = TRUE;								// Polygon Flag Set To TRUE By Default
+		scaleValue = 0.15f;							// Scale Value For The Terrain
+		
+		glShadeModel(GL_SMOOTH);                // Enable Smooth Shading
+		glClearColor(0.0f, 0.0f, 0.0f, 0.5f);           // Black Background
+		glClearDepth(1.0f);                 // Depth Buffer Setup
+		glEnable(GL_DEPTH_TEST);                // Enables Depth Testing
+		glDepthFunc(GL_LEQUAL);                 // The Type Of Depth Testing To Do
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  // Really Nice Perspective Calculations
+ 
+		// Here we read read in the height map from the .raw file and put it in our
+		// g_HeightMap array.  We also pass in the size of the .raw file (1024).
+ 
+		LoadRawFile("../../data/Terrain.raw", MAP_SIZE * MAP_SIZE, g_HeightMap); 
+	}
+
+
+	void HeightMapLoader::draw()
+	{
+		
+		//draw axes
+		glPushMatrix();
+			glScaled(1000,1000,1000);
+			glColor3f(1.0f,0.0f,0.0f);
+			glBegin(GL_LINES);
+				glVertex3f(0.0f,0.0f,0.0f);
+				glVertex3d(1,0,0);
+			glEnd();
+			glColor3f(0.0f,1.0f,0.0f);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(0,1,0);
+			glEnd();
+			glColor3f(0,0,1);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(0,0,1);
+			glEnd();
+		glPopMatrix();
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear The Screen And The Depth Buffer
+		//glLoadIdentity();									// Reset The Matrix
+	
+		// 			 Position	      View		Up Vector
+		//gluLookAt(212, 60, 194,  186, 55, 171,  0, 1, 0);	// This Determines Where The Camera's Position And View Is
+
+		glScalef(scaleValue, scaleValue * HEIGHT_RATIO, scaleValue);
+
+		//use glTranslate and glRotate to position the terrain where the hell i want to
+
+		RenderHeightMap(g_HeightMap);						// Render The Height Map
+	}
+
+
+	void HeightMapLoader::LoadRawFile(LPSTR strName, int nSize, BYTE *pHeightMap)
+	{
+		FILE *pFile = NULL;
+
+		// Open The File In Read / Binary Mode.
+		pFile = fopen( strName, "rb" );
+
+		// Check To See If We Found The File And Could Open It
+		if ( pFile == NULL )	
+		{
+			// Display Error Message And Stop The Function
+			//printf(NULL, "Can't Find The Height Map!", "Error", MB_OK);
+			printf("Can't Find The Height Map!");
+			return;
+		}
+
+		fread( pHeightMap, 1, nSize, pFile );
+
+		// After We Read The Data, It's A Good Idea To Check If Everything Read Fine
+		int result = ferror( pFile );
+
+		// Check If We Received An Error
+		if (result)
+		{
+			//printf(NULL, "Failed To Get Data!", "Error", MB_OK);
+			printf("Failed To Get Data!");
+		}
+
+		// Close The File.
+		fclose(pFile);
+	}
+
+	//alturas
+	int HeightMapLoader::Height(BYTE *pHeightMap, int X, int Y)				// This Returns The Height From A Height Map Index
+	{
+		int x = X % MAP_SIZE;								// Error Check Our x Value
+		int y = Y % MAP_SIZE;								// Error Check Our y Value
+
+		if(!pHeightMap) return 0;							// Make Sure Our Data Is Valid
+
+		return pHeightMap[x + (y * MAP_SIZE)];				// Index Into Our Height Array And Return The Height
+	}
+
+	//cor segundo alturas, higher = brighter
+	void HeightMapLoader::SetVertexColor(BYTE *pHeightMap, int x, int y)		// Sets The Color Value For A Particular Index, Depending On The Height Index
+	{
+		if(!pHeightMap) return;								// Make Sure Our Height Data Is Valid
+
+		float fColor = -0.15f + (Height(pHeightMap, x, y ) / 256.0f);
+
+		// Assign This Blue Shade To The Current Vertex
+		glColor3f(0, 0, fColor );
+	}
+
+	//codigo que desenha o heightmap
+	void HeightMapLoader::RenderHeightMap(BYTE pHeightMap[])					// This Renders The Height Map As Quads
+	{
+		int X = 0, Y = 0;									// Create Some Variables To Walk The Array With.
+		int x, y, z;										// Create Some Variables For Readability
+
+		if(!pHeightMap) return;								// Make Sure Our Height Data Is Valid
+
+		//verificador de estado de terreno
+		if(bRender)											// What We Want To Render
+			glBegin( GL_QUADS );							// Render Polygons
+		else 
+			glBegin( GL_LINES );							// Render Lines Instead
+
+		for ( X = 0; X < (MAP_SIZE-STEP_SIZE); X += STEP_SIZE )
+			for ( Y = 0; Y < (MAP_SIZE-STEP_SIZE); Y += STEP_SIZE )
+			{
+				// Get The (X, Y, Z) Value For The Bottom Left Vertex
+				x = X;							
+				y = Height(pHeightMap, X, Y );	
+				z = Y;							
+
+				// Set The Color Value Of The Current Vertex
+				SetVertexColor(pHeightMap, x, z);
+
+				glVertex3i(x, y, z);						// Send This Vertex To OpenGL To Be Rendered (Integer Points Are Faster)
+
+				// Get The (X, Y, Z) Value For The Top Left Vertex
+				x = X;										
+				y = Height(pHeightMap, X, Y + STEP_SIZE );  
+				z = Y + STEP_SIZE ;							
+			
+				// Set The Color Value Of The Current Vertex
+				SetVertexColor(pHeightMap, x, z);
+
+				glVertex3i(x, y, z);						// Send This Vertex To OpenGL To Be Rendered
+
+				// Get The (X, Y, Z) Value For The Top Right Vertex
+				x = X + STEP_SIZE; 
+				y = Height(pHeightMap, X + STEP_SIZE, Y + STEP_SIZE ); 
+				z = Y + STEP_SIZE ;
+
+				// Set The Color Value Of The Current Vertex
+				SetVertexColor(pHeightMap, x, z);
+			
+				glVertex3i(x, y, z);						// Send This Vertex To OpenGL To Be Rendered
+
+				// Get The (X, Y, Z) Value For The Bottom Right Vertex
+				x = X + STEP_SIZE; 
+				y = Height(pHeightMap, X + STEP_SIZE, Y ); 
+				z = Y;
+
+				// Set The Color Value Of The Current Vertex
+				SetVertexColor(pHeightMap, x, z);
+
+				glVertex3i(x, y, z);						// Send This Vertex To OpenGL To Be Rendered
+			}
+		glEnd();
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);					// Reset The Color
+	}
+
+	void HeightMapLoader::update(unsigned long elapsed_millis) {
+
+		double elapsed_seconds = elapsed_millis / (double)1000; //tempo (time = Time.deltaTime), numero de segundos q passou do ultimo frame
+
+		//desenhar terreno wired
+		if(cg::KeyBuffer::instance()->isKeyDown('o')) {
+			bRender = !bRender;
+		}
+	}
+}
+
+

@@ -1,0 +1,48 @@
+#include "Command.h"
+
+namespace proj {
+	
+	Command::Command(const std::string id) {
+		_title = id;
+		_Xsize = 250;
+		_Ysize = 50;
+	}
+	Command::~Command(){
+	}
+
+	void Command::drawOverlay() {
+		glColor3f(0.0,0.0,1.0);
+		
+		glBegin(GL_QUADS);
+			glVertex2f(0.0, 0.0);
+			glVertex2f(_Xsize, 0.0);
+			glVertex2f(_Xsize, _Ysize);
+			glVertex2f(0.0, _Ysize);
+
+			glColor3f(0.3,1.0,1.0);
+			glRasterPos2d( _Xsize / 2,  _Ysize / 2 );
+			for (std::string::iterator i = _title.begin(); i !=_title.end() ; i++) {
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *i);
+			}
+		glEnd();
+	}
+
+	GLfloat Command::getXsize() {
+		return _Xsize;
+	}
+	
+	GLfloat Command::getYsize() {
+		return _Ysize;
+	}
+
+	std::string Command::getTitle() {
+		return _title;
+	}
+
+	void Command::onReshape(int width, int height) {
+	}
+
+	/*to be implemented by each Command type*/
+	void Command::execute(){};
+
+}

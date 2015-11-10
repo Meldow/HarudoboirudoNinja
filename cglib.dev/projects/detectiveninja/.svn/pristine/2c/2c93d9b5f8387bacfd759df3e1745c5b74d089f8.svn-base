@@ -1,0 +1,92 @@
+#include "Material.h"
+
+namespace proj {
+	
+
+
+	Material::Material() {
+		init();
+	}
+	Material::~Material() {}
+	
+	void Material::init() {
+		this->mat_ambient[0] = 0.0f;
+		this->mat_ambient[1] = 0.0f;
+		this->mat_ambient[2] = 0.0f;
+		this->mat_ambient[3] = 0.0f;
+	
+		this->mat_emission[0] = 0.0f;
+		this->mat_emission[1] = 0.0f;
+		this->mat_emission[2] = 0.0f;
+		this->mat_emission[3] = 0.0f;
+	
+		this->mat_diffuse[0] = 0.0f;
+		this->mat_diffuse[1] = 0.0f;
+		this->mat_diffuse[2] = 0.0f;
+		this->mat_diffuse[3] = 0.0f;
+		
+		this->mat_specular[0] = 0.0f;
+		this->mat_specular[1] = 0.0f;
+		this->mat_specular[2] = 0.0f;
+		this->mat_specular[3] = 0.0f;
+
+		this->mat_shininess[0] = 0.0f;
+	}
+
+	void Material::makeMaterial() {
+		_materialDL = glGenLists(1);
+		assert(_materialDL != 0);
+		glNewList(_materialDL, GL_COMPILE);
+			glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+			glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+			glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+			glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+		glEndList();
+	}
+
+	void Material::apply() {
+		glCallList(_materialDL);
+	}
+
+	std::string Material::getName() {
+		return id;
+	}
+
+	void Material::setName(std::string name) {
+		this->id = name;
+	}
+	
+	void Material::setMatAmbient(GLfloat maR, GLfloat maG, GLfloat maB, GLfloat maA) {
+		this->mat_ambient[0] = maR;
+		this->mat_ambient[1] = maG;
+		this->mat_ambient[2] = maB;
+		this->mat_ambient[3] = maA;
+	}
+	
+	void Material::setMatEmission(GLfloat meR, GLfloat meG, GLfloat meB, GLfloat meA) {
+		this->mat_emission[0] = meR;
+		this->mat_emission[1] = meG;
+		this->mat_emission[2] = meB;
+		this->mat_emission[3] = meA;
+	}
+
+	void Material::setMatDiffuse(GLfloat mdR, GLfloat mdG, GLfloat mdB, GLfloat mdA) {
+		this->mat_diffuse[0] = mdR;
+		this->mat_diffuse[1] = mdG;
+		this->mat_diffuse[2] = mdB;
+		this->mat_diffuse[3] = mdA;
+	}
+	
+	void Material::setMatSpecular(GLfloat msR, GLfloat msG, GLfloat msB, GLfloat msA) {
+		this->mat_specular[0] = msR;
+		this->mat_specular[1] = msG;
+		this->mat_specular[2] = msB;
+		this->mat_specular[3] = msA;
+	}
+	
+	void Material::setMatShininess(GLfloat msh) {
+		this->mat_shininess[0] = msh;
+	}
+	
+}

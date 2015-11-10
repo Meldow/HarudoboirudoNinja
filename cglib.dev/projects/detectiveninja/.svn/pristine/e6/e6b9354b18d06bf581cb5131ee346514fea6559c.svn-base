@@ -1,0 +1,121 @@
+#include "PositionalLight.h"
+
+namespace proj {
+
+	PositionalLight::PositionalLight(std::string id) : cg::Entity(id) {}
+	PositionalLight::~PositionalLight() {}
+
+	void PositionalLight::init() {
+
+		_physics.setPosition(0.0, 0.0, 20.0);
+		_physics.setLinearVelocity(5.0);
+		_physics.setAngularVelocity(100.0);
+		_physics.setAxesScale(100.0);
+
+		GLfloat ambient[] =	{ 0.1f, 0.1f, 0.1f, 1.0f };
+		GLfloat diffuse[] =	{ 0.9f, 0.9f, 0.9f, 1.0f };
+		GLfloat specular[] = { 0.9f, 0.9f, 0.9f, 1.0f };
+
+		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0f);
+		glEnable(GL_LIGHT1);
+
+		makeLight();
+	}
+
+	inline
+	void PositionalLight::makeLight() {
+
+		float position[] =	{ 0.0, 0.0, 0.0, 1.0 };
+		float direction[] = { 0.0, 0.0, -1.0 };
+
+		_lightDL = glGenLists(1);
+		assert(_lightDL != 0);
+
+		glNewList(_lightDL,GL_COMPILE);
+			glLightfv(GL_LIGHT0, GL_POSITION, position);
+			glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, direction);
+		glEndList();
+	}
+
+	void PositionalLight::toggleLight() {
+
+		_lightOn = !_lightOn;
+		if (_lightOn) {
+			glEnable(GL_LIGHT1);
+		}
+		else {
+			glDisable(GL_LIGHT1);
+		}
+	}
+
+	void PositionalLight::update(unsigned long elapsed_millis) {
+
+		if(isDebug() && cg::KeyBuffer::instance()->isKeyDown('1')) {
+
+			if(cg::KeyBuffer::instance()->isKeyDown('l') && _toggleLightKeyReleased) {
+				toggleLight();
+				_toggleLightKeyReleased = false;
+			}
+			if(cg::KeyBuffer::instance()->isKeyUp('l')) {
+				_toggleLightKeyReleased = true;
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('u')) {
+				_physics.goAhead();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('j')) {
+				_physics.goBack();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('h')) {
+				_physics.yawLeft();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('k')) {
+				_physics.yawRight();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('g')) {
+				_physics.pitchUp();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('b')) {
+				_physics.pitchDown();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('v')) {
+				_physics.rollLeft();
+			}
+			if(cg::KeyBuffer::instance()->isKeyDown('n')) {
+				_physics.rollRight();
+			}
+		}
+		double elapsed_seconds = elapsed_millis / (double)1000;
+		_physics.step(elapsed_seconds);
+	}
+
+	void PositionalLight::draw() {
+
+		glPushMatrix();
+			_physics.applyTransforms();
+			glCallList(_lightDL);
+		glPopMatrix();
+
+		if(isDebug()) {
+
+			glDisable(GL_LIGHTING);
+
+			glPushMatrix();
+				_physics.drawAxes();
+			glPopMatrix();
+
+			glPushMatrix();
+				_physics.applyTransforms();
+				glColor3f(0.9f,0.9f,0.9f);
+				glTranslatef(0.4f,0.0f,0.0f);
+				glRotatef(-90.0f,0.0f,1.0f,0.0f);
+				glScalef(10.0f, 10.0f, 10.0f);
+				glutWireCone(0.4,0.4,10,10);
+			glPopMatrix();
+
+			glEnable(GL_LIGHTING);
+		}
+	}
+}

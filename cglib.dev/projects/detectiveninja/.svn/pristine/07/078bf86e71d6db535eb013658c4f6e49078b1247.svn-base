@@ -1,0 +1,68 @@
+#ifndef ENEMY_H
+#define ENEMY_H
+
+#include <string>
+#include <math.h>
+#include "cg/cg.h"
+#include "WorldObject.h"
+#include "Physics.h"
+#include "CollisionManager.h"
+#include "TextureManager.h"
+#include "BoxRed.h"
+
+namespace proj {
+
+	class Enemy : public WorldObject
+	{
+	private:
+		Physics _physics;
+		cg::Vector3d _previousPosition;
+
+		int _alertDL;
+		float _timer;
+		bool _isMoving;
+		bool _spottedNinja, _spottedSexyMagazine;
+
+		float _headWidth, _headLength, _headHeight;
+		float _bodyWidth, _bodyLength, _bodyHeight;
+		float _armWidth, _armLength, _armHeight;
+		float _legWidth, _legLength, _legHeight;
+
+		float _headAngle, _armAngle[2], _legAngle[2];
+		cg::Vector3f _armRotationVector[2], _legRotationVector[2];
+		bool _armDirection[2], _legDirection[2];	// true if moving forward; false if moving backwards
+
+		void updateAngles();
+		void makeAlertDL();
+
+		std::vector<BoxRed*>* _waypoints;
+		int _targetWaypoint;
+		cg::Vector3d _targetWaypointPosition, _myPosition;
+		float _distanceToWaypoint;
+		bool _firstUpdate, _stepForward, _turn;
+		
+	protected:
+		void registerToCollisionManager();
+		void createBoundingSpheres();
+		void updateBoundingSpheres();
+
+	public:
+		Enemy(std::string id, cg::Vector3d position);
+		~Enemy();
+
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+
+		void spottedNinja();
+		void spottedSexyMagazine();
+
+		cg::Vector3d getPosition();
+		void setHeight(int height);
+		cg::Vector3d getFront();
+		void addPath();
+		void addPath(BoxRed* box);
+	};
+}
+
+#endif

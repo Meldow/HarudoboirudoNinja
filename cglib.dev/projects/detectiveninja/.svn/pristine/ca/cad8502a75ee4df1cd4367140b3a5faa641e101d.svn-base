@@ -1,0 +1,104 @@
+#include "FreeCamera.h"
+
+namespace proj {
+
+	FreeCamera::FreeCamera(const std::string id) : Entity(id) {
+	}
+    FreeCamera::~FreeCamera() {
+	}
+    void FreeCamera::init() {
+		cg::tWindowInfo win = cg::Manager::instance()->getApp()->getWindowInfo();
+		
+		_winSize.set(win.width,win.height);
+		_orientation.setRotationDeg(0,cg::Vector3d::ny);
+		
+		_up.set(0,0,1);
+		_front.set(1,0,0);
+		_right.set(0,1,0);
+		_position.set(0,0,0);
+		_lookAt = _position + _front;
+
+		_isRoll = false;
+		_scale = 25.0f;
+		CAM_SPEED = 5;
+		
+	}
+    void FreeCamera::draw() {
+		
+		
+		//printf("right is: %f, %f, %f\n", _right[0], _right[1], _right[2]);
+		//printf("lookAt is: %f, %f, %f\n", _lookAt[0], _lookAt[1], _lookAt[2]);
+		//printf("front is: %f, %f, %f\n", _front[0], _front[1], _front[2]);
+		//printf("position is: %f, %f, %f\n", _position[0], _position[1], _position[2]);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+		gluPerspective(60,_winSize[0]/(double)( 2 *_winSize[1]), 1.0,100.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+		
+		_lookAt = _position + _front;
+		gluLookAt(	_position[0],_position[1],_position[2],
+					_lookAt[0] , _lookAt[1] , _lookAt[2] ,
+					_up[0],_up[1],_up[2]);
+		
+    }
+
+	void FreeCamera::onReshape(int width, int height) {
+		_winSize.set(width,height);
+	}
+#if !defined(GLUT_WHEEL_UP)
+# define GLUT_WHEEL_UP 3
+# define GLUT_WHEEL_DOWN 4
+#endif
+	void FreeCamera::onMouse(int button, int state, int x, int y) {
+		_isRoll = (button == GLUT_RIGHT_BUTTON);
+		_lastMousePosition.set(x,y);
+	}
+	void FreeCamera::onMouseMotion(int x, int y) {
+		if(_isRoll) {
+			double anglez = (_lastMousePosition[0] - x) / (double)5;
+				_q.setRotationDeg(anglez,_front);
+				_up = apply(_q,_up);
+				_right = apply(_q,_right);
+				
+				_orientation = _q * _orientation;
+		} else {
+				
+			double anglex = (_lastMousePosition[0] - x) / (double)5;
+				_q.setRotationDeg(anglex,_up);
+				_front = apply(_q,_front);
+				_right = apply(_q,_right);
+				_orientation = _q * _orientation;
+			double angley = (y - _lastMousePosition[1]) / (double)5;
+				_q.setRotationDeg(angley, _right);
+				//_up = apply(_q,_up);
+				_front = apply(_q,_front);
+				_orientation = _q * _orientation;
+				
+		}
+		_lastMousePosition.set(x,y);
+	}
+	void FreeCamera::onMousePassiveMotion(int x, int y) {
+	}
+
+	void FreeCamera::update(unsigned long elapsed_millis) {
+		double elapsed_seconds = elapsed_millis / (double)1000; //tempo (time = Time.deltaTime), numero de segundos q passou do ultimo frame
+		
+		if(cg::KeyBuffer::instance()->isSpecialKeyDown(GLUT_KEY_DOWN)) {
+			_position -= CAM_SPEED * _front * elapsed_seconds;
+		}
+		if(cg::KeyBuffer::instance()->isSpecialKeyDown(GLUT_KEY_UP)) {
+			_position += CAM_SPEED * _front * elapsed_seconds;
+		}
+		if(cg::KeyBuffer::instance()->isSpecialKeyDown(GLUT_KEY_RIGHT)) {
+			_position -= CAM_SPEED * _right * elapsed_seconds;
+		}
+		if(cg::KeyBuffer::instance()->isSpecialKeyDown(GLUT_KEY_LEFT)) {
+			_position += CAM_SPEED * _right * elapsed_seconds;
+		}
+
+	}
+
+}

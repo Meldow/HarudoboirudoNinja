@@ -1,0 +1,42 @@
+/**
+ * Light source that’s treated as though it’s located infinitely far away from the scene,
+ * so that the rays of light can be considered parallel by the time they reach an object.
+ *
+ * DEBUG MODE
+ * While pressing '0', use 'l' to turn on and off the light and the keys 'u', 'h', 'j', 'k'
+ * and 'g', 'v', 'b', 'n' to change its position.
+ */
+#include "DirectionalLight.h"
+
+namespace proj {
+
+	DirectionalLight::DirectionalLight(std::string id) : Light(id) {
+		_lightConstant = GL_LIGHT0;
+		makeLight();
+	}
+
+	DirectionalLight::~DirectionalLight() {}
+
+	void DirectionalLight::init() {
+		_physics.setAngularVelocity(100.0);
+		_physics.setAxesScale(10.0);
+
+		glEnable(_lightConstant);
+		_lightOn = true;
+
+		_controlLightKey = '0';
+	}
+
+	inline
+	void DirectionalLight::makeLight() {
+
+		GLfloat position[] = { 1.0, 1.0, 1.0, 0.0 };
+
+		_lightDL = glGenLists(1);
+		assert(_lightDL != 0);
+
+		glNewList(_lightDL,GL_COMPILE);
+			glLightfv(_lightConstant, GL_POSITION, position);
+		glEndList();
+	}
+}

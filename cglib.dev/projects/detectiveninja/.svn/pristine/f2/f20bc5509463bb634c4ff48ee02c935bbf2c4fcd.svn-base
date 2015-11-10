@@ -1,0 +1,33 @@
+#ifndef LIGHT_H
+#define LIGHT_H
+
+#include <string>
+#include "cg/cg.h"
+#include "MyPhysics.h"
+#include "Debug.h"
+
+namespace proj {
+
+	class Light : public cg::Entity,
+		public cg::IDrawListener,
+		public cg::IUpdateListener,
+		public Debug
+	{
+	private:
+		bool _isDebug;
+		MyPhysics _physics;
+		int _lightDL;
+		void makeLight();
+
+	public:
+		Light(std::string id);
+		~Light();
+		void init();
+		void update(unsigned long elapsed_millis);
+		void draw();
+
+		void toggleDebugMode();
+	};
+}
+
+#endif

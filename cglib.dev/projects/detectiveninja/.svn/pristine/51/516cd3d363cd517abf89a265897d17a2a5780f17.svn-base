@@ -1,0 +1,40 @@
+#ifndef LEVEL_MANAGER_H
+#define LEVEL_MANAGER_H
+
+#include "cg/cg.h"
+#include <list>
+#include "Level.h"
+#include "MaterialManager.h"
+#include "Material.h"
+#include "TextureManager.h"
+#include "Texture.h"
+#include "Scene.h"
+#include "ImageLoaderHeightMap.h"
+#include "ImageLoaderItemMap.h"
+
+#define LEVEL_PATH "../../data/"
+
+namespace proj {
+
+	class LevelManager : public cg::Entity
+	{
+	private:
+		Level* _currentLevel;
+		int _currentClues;
+		//TODO list of clues
+	public:
+		LevelManager();
+		~LevelManager();
+		void init();
+		void loadLevel(Level* lvl);
+		void restartLevel();
+		void addClue();
+		
+		int getTotalClues();
+		int getCurrentClues();
+
+		void onClueGet();
+	};
+}
+
+#endif

@@ -1,0 +1,16 @@
+#include "ToggleDebugCommand.h"
+
+namespace proj {
+	
+	ToggleDebugCommand::ToggleDebugCommand() : Command("TOGGLE DEBUG") {
+	}
+	ToggleDebugCommand::~ToggleDebugCommand(){
+	}
+
+	void ToggleDebugCommand::execute() {
+		DebugManager* dm = static_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"));
+		dm->toggleDebugMode();
+
+		static_cast<MainApp*>(cg::Manager::instance()->getApp())->unpause();
+	}
+}

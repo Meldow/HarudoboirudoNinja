@@ -1,0 +1,94 @@
+// This file is an example for CGLib.
+//
+// CGLib is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// CGLib is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with CGLib; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+// Copyright 2012 Carlos Martinho
+
+#ifndef PHYSICS_H
+#define PHYSICS_H
+
+#include "cg/cg.h"
+
+namespace proj {
+
+	class Physics {
+	private:
+		cg::Vector3d _position;
+		cg::Quaterniond _orientation;
+		cg::Vector3d _front, _up, _right;
+		double _linearVelocity;
+		double _upLinearVelocity;
+		double _angularVelocity;
+
+		cg::Quaterniond _q;
+		double _rotationMatrix[16];
+
+		bool _isGoAhead, _isGoBack;
+		bool _isYawLeft, _isYawRight;
+		bool _isPitchUp, _isPitchDown;
+		bool _isRollLeft, _isRollRight;
+
+		bool _isJumping, _isDoubleJumping, _jumpBoost;
+		float _gravity;
+		int _minHeight;
+
+		void rotate(double elapsed_seconds,int direction, cg::Vector3d axis, cg::Vector3d& v1, cg::Vector3d& v2);
+
+		double _axesScale;
+
+	public:
+		Physics();
+		~Physics();
+
+		cg::Vector3d getPosition();
+		cg::Quaterniond getOrientation();
+		cg::Vector3d getFront();
+		cg::Vector3d getUp();
+		cg::Vector3d getRight();
+
+		void setMinHeight(int minHeigth);
+
+		void goAhead();
+		void goBack();
+		void yawLeft();
+		void yawRight();
+		void pitchUp();
+		void pitchDown();
+		void rollLeft();
+		void rollRight();
+
+		void jump();
+		void doubleJump();
+
+		bool isJumping();
+		bool isDoubleJumping();
+
+		void setPosition(double x, double y, double z);
+		void setLinearVelocity(double value);
+		void setAngularVelocity(double value);
+
+		void step(double elapsed_seconds);
+		void applyTransforms();
+
+		void setAxesScale(double scale);
+		void drawAxes();
+
+		void rotateToAngle(double elapsed_seconds, cg::Vector3d newDirection); 
+		void rotateToAngle(double elapsed_seconds, double angle, cg::Vector3d& v1, cg::Vector3d& v2); 
+		void resetFront();
+	};
+}
+
+#endif

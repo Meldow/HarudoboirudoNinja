@@ -1,0 +1,76 @@
+#include "Grid.h"
+
+//TODO alterar para 3D
+namespace proj {
+
+	Grid::Grid(std::string id) : cg::Entity(id) {
+	}
+	Grid::~Grid() {
+	}
+	void Grid::init() {
+		cg::tWindowInfo win = cg::Manager::instance()->getApp()->getWindowInfo();
+		//_position.set(win.width/2.0f, win.height/2.0f);
+		
+	}
+
+	void Grid::update(unsigned long elapsed_millis) {
+		
+	}
+	void Grid::draw() {
+		//draw Grid with spacing 10 1024x1024x1024
+		// -512 to 512
+		if(!isDebug()) {
+			return;
+		}
+
+		glPushMatrix();
+
+		glColor3f(1.0f,1.0f,1.0f);
+
+		/*for(z = -10; z<= 20;) {
+			for(x = -512; x<= 512;) {
+				glBegin(GL_LINES);
+					glVertex3f(x,512.0f,z);
+					glVertex3f(x,-512.0,z);
+				glEnd();
+				x += 10;
+			}
+
+			for(y = -512; y<= 512;) {
+				glBegin(GL_LINES);
+					glVertex3f(512,y,z);
+					glVertex3f(-512,y,z);
+				glEnd();
+				x += 10;
+			
+				y += 10;
+			}
+
+			z += 10;
+		}		*/
+
+		for(x = -512; x<= 512;) {
+			glBegin(GL_LINES);
+				glVertex3f(x,512.0f,0);
+				glVertex3f(x,-512.0,0);
+			glEnd();
+			x += 10;
+		}
+
+		for(y = -512; y<= 512;) {
+			glBegin(GL_LINES);
+				glVertex3f(512,y,0);
+				glVertex3f(-512,y,0);
+			glEnd();
+			x += 10;
+			
+			y += 10;
+		}
+
+	
+		glPopMatrix();
+		
+	
+	}
+	
+}

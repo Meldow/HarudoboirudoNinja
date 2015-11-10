@@ -1,0 +1,337 @@
+#include "ImageLoaderHeightMap.h"
+
+namespace proj {
+	
+	ImageLoaderHeightMap::ImageLoaderHeightMap(std::string id) : cg::Entity(id) {}
+	
+	ImageLoaderHeightMap::ImageLoaderHeightMap(std::string id, std::string mapFile) : cg::Entity(id) {
+		_mapFile = mapFile;
+	}
+
+	ImageLoaderHeightMap::~ImageLoaderHeightMap() {}
+
+	void ImageLoaderHeightMap::init() {
+		setup();
+	}
+
+	void ImageLoaderHeightMap::setup() {
+		printf("-------- Height Map --------\n");
+		printf("LOADING HEIGHTMAP...\n");
+		scaleValue = 1.0f;							
+		_rotate = 0.0f;
+		glShadeModel(GL_SMOOTH);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+		glClearDepth(1.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+ 
+		LoadRawFile(_mapFile, MAP_SIZE * MAP_SIZE, g_HeightMap); 
+		printf("HEIGHTMAP LOADED.\n");
+		dynamic_cast<DebugManager*>(cg::Registry::instance()->get("DebugManager"))->registerMap(dynamic_cast<Debug*>(this));
+	}
+
+	void ImageLoaderHeightMap::update(unsigned long elapsed_millis) {
+		double elapsed_seconds = elapsed_millis / (double)1000;
+		//_position[0] += elapsed_seconds*100;
+		//printf("pos: %d\n", _position[0]);
+		//_rotate += elapsed_seconds*10;
+		//printf("rotate: %d\n", _rotate);
+
+	}
+
+	void ImageLoaderHeightMap::draw()
+	{
+		glPushMatrix();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// LOAD MATERIAL
+			MaterialManager* mm = dynamic_cast<MaterialManager*>(cg::Registry::instance()->get("MaterialManager"));
+			mm->get("obsidian")->apply();
+
+			//glDisable(GL_LIGHTING);
+			glEnable(GL_TEXTURE_2D);
+			RenderHeightMap(g_HeightMap);
+			glDisable(GL_TEXTURE_2D);
+			//glEnable(GL_LIGHTING);
+		
+		glPopMatrix();
+
+		if(isDebug())
+		{
+			drawAxes();
+		}
+		
+	}
+
+
+	void ImageLoaderHeightMap::LoadRawFile(std::string strName, int nSize, BYTE *pHeightMap)
+	{
+		FILE *pFile = NULL;
+
+		// Open The File In Read / Binary Mode.
+		pFile = fopen( strName.c_str(), "rb" );
+
+		// Check To See If We Found The File And Could Open It
+		if ( pFile == NULL )	
+		{
+			// Display Error Message And Stop The Function
+			//printf(NULL, "Can't Find The Height Map!", "Error", MB_OK);
+			printf("Can't Find The Height Map!\n");
+			return;
+		}
+
+		fread( pHeightMap, 1, nSize, pFile );
+
+		// After We Read The Data, It's A Good Idea To Check If Everything Read Fine
+		int result = ferror( pFile );
+
+		// Check If We Received An Error
+		if (result)
+		{
+			//printf(NULL, "Failed To Get Data!", "Error", MB_OK);
+			printf("Failed To Get Data!\n");
+		}
+
+		// Close The File.
+		fclose(pFile);
+		printf("HeightMapLoader: Height data collected sucessfully.\n");
+	}
+
+	//alturas
+	int ImageLoaderHeightMap::Height(BYTE *pHeightMap, int X, int Y)				// This Returns The Height From A Height Map Index
+	{
+		int x = X % MAP_SIZE;								// Error Check Our x Value
+		int y = Y % MAP_SIZE;								// Error Check Our y Value
+
+		if(!pHeightMap) return 0;							// Make Sure Our Data Is Valid
+		
+		//retorna a altura do ponto X,Y
+		return pHeightMap[x + (y * MAP_SIZE)];				// Index Into Our Height Array And Return The Height
+	}
+
+	int ImageLoaderHeightMap::Height(int X, int Y)
+	{
+		return Height(g_HeightMap, X, Y);
+	}
+
+	//cor segundo alturas, higher = brighter
+	void ImageLoaderHeightMap::SetVertexColor(BYTE *pHeightMap, int x, int y)		// Sets The Color Value For A Particular Index, Depending On The Height Index
+	{
+		if(!pHeightMap) return;								// Make Sure Our Height Data Is Valid
+		
+		//-0.15 + altura / 256 ; pinta com tonalidades diferentes
+		float fColor = -0.15f + (Height(pHeightMap, x, y ) / 256.0f);
+		
+		// Assign This Blue Shade To The Current Vertex
+		glColor3f(0, 0, fColor );
+	}
+
+	void ImageLoaderHeightMap::RenderHeightMap(BYTE pHeightMap[])					// This Renders The Height Map As Quads
+	{
+		int X = 0, Y = 0;						// Create some variables to walk the array with.
+		int x, y, z;							// Create some variables for readability
+		float fColor = 0.0f;					// Create a variable to hold our color of the polygon
+		
+		//to create my normals
+		cg::Vector3d firstvec, secondvec, normalvec;
+
+		// LOAD TEXTURES
+		TextureManager* tm = dynamic_cast<TextureManager*>( cg::Registry::instance()->get("TextureManager"));
+		GLuint txHeightMap = tm->get("height_map")->getTextureDL();
+
+		if(!pHeightMap) return;					// Make sure our height data is valid
+
+		if(!isDebug()) 				
+		{
+			// Render the triangles in fill mode		
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
+
+			glBindTexture(GL_TEXTURE_2D, txHeightMap);
+			glBegin( GL_QUADS );					// Render Quads
+			
+			for ( X = 0; X < MAP_SIZE; X += STEP_SIZE )
+				for ( Y = 0; Y < MAP_SIZE; Y += STEP_SIZE )
+				{
+					//calculates face normal
+					firstvec = makeVec(	X,	Y,				Height(pHeightMap, X + STEP_SIZE, Y),
+										X,	Y + STEP_SIZE,	Height(pHeightMap, X, Y + STEP_SIZE)
+										);
+				
+					secondvec = makeVec(X,				Y,	Height(pHeightMap, X, Y ), 
+										X + STEP_SIZE,	Y,	Height(pHeightMap, X + STEP_SIZE, Y)
+										);
+
+					//calculates crossproduct
+					normalvec.set(crossProduct(firstvec,secondvec));
+					normalvec = normalvec *(-1);
+					cg::Vector3d aux = sqrt(pow(normalvec[0],2) + pow(normalvec[1],2) + pow(normalvec[2], 2));
+					normalvec = normalvec/aux;
+
+					// Get the (X, Y, Z) value for the bottom left vertex		
+					x = X;							
+					y = Y;	
+					z = Height(pHeightMap, X, Y );							
+				
+					//sets normal
+					glNormal3d(normalvec[0],normalvec[1],normalvec[2]);
+					setTextureCoord( (float)x, (float)y );
+					glVertex3i(x, y, z);
+
+					// Get the (X, Y, Z) value for the top left vertex		
+					x = X;										
+					y = Y + STEP_SIZE;  
+					z = Height(pHeightMap, X, Y + STEP_SIZE );							
+
+					setTextureCoord( (float)x, (float)y );
+					glVertex3i(x, y, z);
+
+					// Get the (X, Y, Z) value for the top right vertex		
+					x = X + STEP_SIZE; 
+					y = Y + STEP_SIZE; 
+					z = Height(pHeightMap, X + STEP_SIZE, Y + STEP_SIZE ) ;
+
+					setTextureCoord( (float)x, (float)y );
+					glVertex3i(x, y, z);
+
+					// Get the (X, Y, Z) value for the bottom right vertex		
+					x = X + STEP_SIZE; 
+					y = Y; 
+					z = Height(pHeightMap, X + STEP_SIZE, Y );
+
+					setTextureCoord( (float)x, (float)y );
+					glVertex3i(x, y, z);			// Send this vertex to OpenGL to be rendered
+				}
+			
+		glEnd();
+		}
+		
+		
+		else 
+		{
+			// Render the triangles in wire frame mode
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	
+
+				for ( X = 0; X < MAP_SIZE; X += STEP_SIZE )
+					for ( Y = 0; Y < MAP_SIZE; Y += STEP_SIZE )
+					{
+						glBegin( GL_QUADS );
+						//calculates face normal
+							firstvec = makeVec(	X,	Y,				Height(pHeightMap, X + STEP_SIZE, Y),
+												X,	Y + STEP_SIZE,	Height(pHeightMap, X, Y + STEP_SIZE)
+												);
+				
+							secondvec = makeVec(X,				Y,	Height(pHeightMap, X, Y ), 
+												X + STEP_SIZE,	Y,	Height(pHeightMap, X + STEP_SIZE, Y)
+												);
+
+							//calculates crossproduct
+							normalvec.set(crossProduct(firstvec,secondvec));
+							normalvec = normalvec *(-1);
+							cg::Vector3d aux = sqrt(pow(normalvec[0],2) + pow(normalvec[1],2) + pow(normalvec[2], 2));
+							normalvec = normalvec/aux;
+
+							// Get the (X, Y, Z) value for the bottom left vertex		
+							x = X;							
+							y = Y;	
+							z = Height(pHeightMap, X, Y );							
+
+							SetVertexColor(pHeightMap, x, y);
+							//sets normal
+							glNormal3d(normalvec[0],normalvec[1],normalvec[2]);
+							glVertex3i(x, y, z);
+
+							// Get the (X, Y, Z) value for the top left vertex		
+							x = X;										
+							y = Y + STEP_SIZE;  
+							z = Height(pHeightMap, X, Y + STEP_SIZE );							
+			
+							SetVertexColor(pHeightMap, x, y);
+							glVertex3i(x, y, z);
+
+							// Get the (X, Y, Z) value for the top right vertex		
+							x = X + STEP_SIZE; 
+							y = Y + STEP_SIZE; 
+							z = Height(pHeightMap, X + STEP_SIZE, Y + STEP_SIZE ) ;
+
+							SetVertexColor(pHeightMap, x, y);
+							glVertex3i(x, y, z);
+
+							// Get the (X, Y, Z) value for the bottom right vertex		
+							x = X + STEP_SIZE; 
+							y = Y; 
+							z = Height(pHeightMap, X + STEP_SIZE, Y );
+
+							SetVertexColor(pHeightMap, x, y);
+							glVertex3i(x, y, z);
+						glEnd();
+
+						//Draw Normal
+						glBegin(GL_LINES);
+							glVertex3f(x, y, z);
+							glVertex3f(x+normalvec[0], y+normalvec[1], z+normalvec[2]);
+						glEnd( );
+					}
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
+		}
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+	}
+	
+	void ImageLoaderHeightMap::drawAxes() {
+		glPushMatrix();
+			glScaled(1100,1100,1100);
+			glColor3f(1.0f,0.0f,0.0f);
+			glBegin(GL_LINES);
+				glVertex3f(0.0f,0.0f,0.0f);
+				glVertex3d(1,0,0);
+			glEnd();
+			glColor3f(0.0f,1.0f,0.0f);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(0,1,0);
+			glEnd();
+			glColor3f(0,0,1);
+			glBegin(GL_LINES);
+				glVertex3d(0.0,0.0,0.0);
+				glVertex3d(0,0,1);
+			glEnd();
+		glPopMatrix();
+	}
+
+	//TODO
+	void ImageLoaderHeightMap::drawNormalVertex(int x, int z, cg::Vector3d _up) {
+		glPushMatrix();
+			glColor3f(1.0f,1.0f,1.0f);
+			
+		glPopMatrix();
+	}
+
+
+	cg::Vector3d ImageLoaderHeightMap::crossProduct(cg::Vector3d v1, cg::Vector3d v2) {	
+		cg::Vector3d returnValue;
+		returnValue.set(	v1[1] * v2[2] - v1[2] * v2[1],
+							v1[2] * v2[0] - v1[0] * v2[2],
+							v1[0] * v2[1] - v1[1] * v2[0]);
+		return returnValue;
+	}
+
+	cg::Vector3d ImageLoaderHeightMap::makeVec(double x1, double y1, double z1, double x2, double y2, double z2) {
+		return cg::Vector3d(x2-x1,y2-y1,z2-z1);
+	}
+
+	void ImageLoaderHeightMap::setTextureCoord(float x, float y) {
+		glTexCoord2f(   (float)x / (float)MAP_SIZE, (float)y / (float)MAP_SIZE	);
+	}
+
+	void ImageLoaderHeightMap::setHeightMap(std::string mapname){
+		_mapFile = mapname;
+		printf("************************************\n");
+		printf("Starting to reload new HeightMap\n");
+		setup();
+	}
+
+}
+
+

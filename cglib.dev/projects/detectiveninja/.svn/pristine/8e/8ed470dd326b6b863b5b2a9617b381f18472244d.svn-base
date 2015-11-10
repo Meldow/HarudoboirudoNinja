@@ -1,0 +1,32 @@
+#include "Object.h"
+
+//TODO alterar para 3D
+namespace proj {
+
+	Object::Object(std::string id, cg::Vector3d position) : cg::Entity(id) {
+		_position = position;
+	}
+	Object::~Object() {
+	}
+
+	void Object::init() {
+	}
+
+	void Object::update(unsigned long elapsed_millis) {
+		double elapsed_seconds = elapsed_millis / (double)1000;
+	}
+
+	void Object::draw() {
+		glPushMatrix();
+			glTranslatef(_position[0], _position[1], _position[2]+16/2);
+			glColor3f(1.0f,0.0f,1.0f);
+			glutSolidCube(16.0);
+		glPopMatrix();
+	}
+
+	cg::Vector3d Object::getPosition(){
+		return _position;
+	}
+	
+	
+}

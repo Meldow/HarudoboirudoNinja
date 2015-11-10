@@ -1,0 +1,66 @@
+#include "Controller.h"
+
+namespace proj {
+
+	/* 
+		Implementa listener e recebe info do teclado
+	*/
+
+	Controller::Controller(const std::string& id) : cg::Entity(id) {
+	}
+	Controller::~Controller() {
+	}
+	void Controller::init() {
+	}
+	
+	
+	void Controller::onKeyPressed(unsigned char key) {
+        //ESC to ShutDown App
+		if (key == 27) { 
+			cg::Manager::instance()->shutdownApp();
+        }
+	}
+
+	//on keyrelease para garantir que so ocorre uma vez
+	void Controller::onKeyReleased(unsigned char key) {
+		if(key == GLUT_KEY_F2) { 
+			printf("Trying to enter debug mode!\n");
+
+			HeightMapLoader *map = (HeightMapLoader* )cg::Registry::instance()->get("mappedterrain");
+			map->switchDebug();
+
+			Grid *grid = (Grid* )cg::Registry::instance()->get("grid1");
+			grid->switchDebug();
+			
+			Player *player = (Player* )cg::Registry::instance()->get("ninja");
+			player->switchDebug();
+		}
+		
+		
+
+	}
+
+
+	//faz notify de tudo o que esta no registo
+	//todas as entidades criadas//destruidas, dentro do C:\Users\Alex\Documents\IST\AVT\cglib.dev\projects\detectiveninja\scripts\vs2010
+	//pode(deve-se) alterar dump
+	void Controller::onSpecialKeyReleased(int key) {
+        if (key == GLUT_KEY_F1) {
+			cg::Manager::instance()->getApp()->dump();
+        }
+
+		if(key == GLUT_KEY_F3) {
+			printf("SWITCHING TO MAIN_CAMERA...\n");
+			Camera* camera = dynamic_cast<Camera*>( cg::Registry::instance()->get("Camera"));
+			camera->mainCamera();
+		}
+		
+		if(key == GLUT_KEY_F4) {
+			printf("SWITCHING TO FREE_CAMERA...\n");
+			Camera* camera = dynamic_cast<Camera*>( cg::Registry::instance()->get("Camera"));
+			camera->freeCamera();
+		}
+
+	}
+
+}

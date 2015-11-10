@@ -1,0 +1,56 @@
+#include "MainApp.h"
+
+namespace proj {
+
+	MainApp::MainApp() {
+
+		_windowInfo.caption = "Hardboiled Ninja";
+		_windowInfo.width = 1024;
+		_windowInfo.height = 768;
+		_windowInfo.x = 0;
+		_windowInfo.y = 0;
+	}
+
+	MainApp::~MainApp() {}
+	
+	void MainApp::createEntities() {
+		
+		float light0position[] =	{ 20.0, 20.0, 10.0, 1.0 };
+		float light0direction[] = { 0.0, 0.0, -1.0 };
+
+		addEntity(new MaterialManager());
+		addEntity(new TextureManager());
+		LevelManager* lm = new LevelManager(); 
+		addEntity(lm);
+		addEntity(new Scene());
+		lm->loadLevel(new Level1());
+		addEntity(new DebugManager());
+		addEntity(new Camera());
+		addEntity(new MainCamera());
+		addEntity(new FreeCamera());
+		addEntity(new Ninja("Ninja", cg::Vector3d(0,0,0)));
+		//addEntity(new Enemy("Enemy0", cg::Vector3d(10,10,0)));
+		//addEntity(new Enemy("Enemy1", cg::Vector3d(20,20,0)));
+		//addEntity(new StaticBox("DummyBox0", cg::Vector3d(30,30,0), 10));
+		//addEntity(new StaticBox("DummyBox1", cg::Vector3d(60,30,0), 10));
+		addEntity(new Controller());
+		addEntity(new Grid("grid1"));
+		addEntity(new CollisionManager());
+	}
+
+	void MainApp::createViews() {
+		
+		cg::View* v = createView("view1");
+		v->setViewport(0.0f,0.0f,1.0f,1.0f);
+		v->linkEntityAtEnd("Scene");
+		v->linkEntityAtEnd("Camera");
+		v->linkEntityAtEnd("mappedterrain");
+		//v->linkEntityAtEnd("grid1");
+		v->linkEntityAtEnd("Ninja");
+		//v->linkEntityAtEnd("Enemy0");
+		//v->linkEntityAtEnd("Enemy1");
+		//v->linkEntityAtEnd("DummyBox0");
+		//v->linkEntityAtEnd("DummyBox1");
+		v->linkEntityAtEnd("CollisionManager");
+	}
+}
